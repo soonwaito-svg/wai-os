@@ -1,0 +1,45 @@
+{
+  "name": "WAI Master OS",
+  "short_name": "WAI.SYS",
+  "description": "WAI personal operating system — content, income, schedule",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#080809",
+  "theme_color": "#080809",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "finance"],
+  "shortcuts": [
+    {
+      "name": "今天行程",
+      "short_name": "行程",
+      "url": "/index.html#schedule",
+      "description": "查看今天时间表"
+    },
+    {
+      "name": "个人品牌",
+      "short_name": "SW",
+      "url": "/index.html#personal",
+      "description": "今天发什么"
+    },
+    {
+      "name": "收入追踪",
+      "short_name": "收入",
+      "url": "/index.html#income",
+      "description": "更新收入数字"
+    }
+  ]
+}

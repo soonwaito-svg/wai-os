@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WAI.SYS">
+<meta name="theme-color" content="#080809">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>WAI — Master OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#080809;--s1:#0F0F11;--s2:#161618;--s3:#1E1E21;--bd:#272729;--bd2:#383838;
+  --y:#FFD93D;--g:#6BCB77;--r:#FF6B6B;--b:#4D96FF;--p:#C77DFF;--o:#FFA552;
+  --t:#F2F2F2;--mt:#888;--dim:#444;
+  --mono:'IBM Plex Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);color:var(--t);font-family:var(--sans);min-height:100vh;}
+
+/* ── TOP NAV ── */
+.top-nav{position:sticky;top:0;padding-top:env(safe-area-inset-top);z-index:200;background:rgba(8,8,9,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);}
+.top-nav-inner{display:flex;align-items:center;padding:0 16px;max-width:1000px;margin:0 auto;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.top-nav-inner::-webkit-scrollbar{display:none;}
+.nav-logo{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--y);padding:14px 14px 14px 0;white-space:nowrap;flex-shrink:0;border-right:1px solid var(--bd);margin-right:8px;}
+.nav-logo span{color:var(--dim);}
+.nb{padding:6px 12px;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:500;color:var(--dim);background:none;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;letter-spacing:.5px;}
+.nb:hover{color:var(--t);background:var(--s2);}
+.nb.on{color:var(--y);background:rgba(255,217,61,.08);}
+.nb.section-start{margin-left:8px;border-left:1px solid var(--bd);padding-left:14px;}
+
+/* ── SUB NAV ── */
+.sub-nav{background:var(--s1);border-bottom:1px solid var(--bd);display:none;}
+.sub-nav.visible{display:block;}
+.sub-nav-inner{display:flex;padding:0 16px;max-width:1000px;margin:0 auto;overflow-x:auto;scrollbar-width:none;}
+.sub-nav-inner::-webkit-scrollbar{display:none;}
+.sb{padding:8px 14px;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;margin-bottom:-1px;}
+.sb:hover{color:var(--t);}
+.sb.on{color:var(--y);border-bottom-color:var(--y);}
+
+/* ── MAIN ── */
+.main{padding:20px 16px 80px;max-width:1000px;margin:0 auto;}
+.section{display:none;}.section.on{display:block;}
+.sub-pg{display:none;}.sub-pg.on{display:block;}
+
+/* ── TYPOGRAPHY ── */
+.stag{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--y);text-transform:uppercase;margin-bottom:4px;}
+.stitle{font-size:22px;font-weight:800;margin-bottom:18px;letter-spacing:-.3px;}
+.clabel{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;margin-bottom:12px;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:10px;}
+.hb{background:rgba(255,217,61,.04);border:1px solid rgba(255,217,61,.15);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+.hbl{font-family:var(--mono);font-size:9px;color:var(--y);letter-spacing:2px;margin-bottom:4px;}
+.hbt{font-size:12px;color:#ccc;line-height:1.6;}.hbt strong{color:#fff;}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr 1fr;}}
+@media(max-width:380px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+/* ── STAT BLOCK ── */
+.stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:14px;text-align:center;}
+.stat .s-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--mt);text-transform:uppercase;margin-bottom:6px;}
+.stat .s-val{font-family:var(--mono);font-size:20px;font-weight:700;line-height:1;}
+.stat .s-sub{font-size:11px;color:var(--mt);margin-top:4px;}
+.stat.hi{border-color:rgba(255,217,61,.3);background:rgba(255,217,61,.04);}
+.stat.hi .s-val{color:var(--y);}
+.stat.good .s-val{color:var(--g);}
+.stat.warn .s-val{color:var(--r);}
+
+/* ── GOAL BLOCK ── */
+.gb{background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--bd);}
+.gb .gi{font-size:20px;margin-bottom:6px;}
+.gb .gl{font-size:11px;color:var(--mt);margin-bottom:3px;}
+.gb .gv{font-size:15px;font-weight:700;line-height:1.4;}
+.gb .gv .hl{color:var(--y);}
+
+/* ── MILESTONE ── */
+.mtrack{display:flex;gap:10px;flex-wrap:wrap;}
+.mi{flex:1;min-width:130px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;}
+.mi.now{border-color:var(--y);}
+.mi.nxt{border-color:var(--g);}
+.mi .mdot{font-family:var(--mono);font-size:11px;font-weight:700;margin-bottom:6px;}
+.mi.now .mdot{color:var(--y);}
+.mi.nxt .mdot{color:var(--g);}
+.mi .mmo{font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:5px;}
+.mi .mg{font-size:12px;line-height:1.6;}
+.mi .mg .hi{color:var(--g);font-weight:600;}
+
+/* ── PROGRESS BAR ── */
+.prg-wrap{margin-bottom:12px;}
+.prg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.prg-name{font-size:13px;font-weight:600;}
+.prg-val{font-family:var(--mono);font-size:11px;}
+.prg-track{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.prg-fill{height:100%;border-radius:3px;transition:width .8s;}
+.prg-note{font-family:var(--mono);font-size:10px;color:var(--mt);margin-top:3px;}
+
+/* ── INCOME BARS ── */
+.ir{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.il{font-size:12px;color:#aaa;width:110px;flex-shrink:0;}
+.itr{flex:1;height:5px;background:var(--s2);border-radius:3px;}
+.if{height:100%;border-radius:3px;}
+.iv{font-family:var(--mono);font-size:11px;width:90px;text-align:right;flex-shrink:0;}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:20px;}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--bd);}
+.tl-block{position:relative;margin-bottom:10px;}
+.tl-card{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:11px 13px;}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:3px;}
+.tl-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+.tl-desc{font-size:11px;color:var(--mt);}
+.c-class .tl-card{border-color:var(--b);}
+.c-js .tl-card{border-color:var(--p);}
+.c-sw .tl-card{border-color:var(--g);}
+.c-money .tl-card{border-color:var(--y);}
+.c-rest .tl-card{border-color:var(--dim);}
+.c-event .tl-card{border-color:var(--o);}
+
+/* ── TASK ROW ── */
+.task{display:flex;gap:9px;align-items:flex-start;padding:11px;background:var(--s2);border-radius:8px;margin-bottom:7px;border:1px solid var(--bd);}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--y);margin-top:5px;flex-shrink:0;}
+.tx{font-size:13px;color:#ccc;line-height:1.5;}
+.tx strong{color:#fff;}
+
+/* ── TIME ROW ── */
+.tr{display:flex;gap:10px;align-items:flex-start;padding:11px;background:var(--s2);border-radius:8px;margin-bottom:7px;border:1px solid var(--bd);}
+.tt{font-family:var(--mono);font-size:10px;background:rgba(255,217,61,.08);color:var(--y);border-radius:4px;padding:3px 8px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.td{font-size:13px;color:#ccc;line-height:1.5;}
+.td strong{color:#fff;}
+
+/* ── WEAK ── */
+.wi{background:var(--s2);border-left:3px solid var(--r);border-radius:0 8px 8px 0;padding:11px;margin-bottom:9px;}
+.wt{font-size:13px;font-weight:700;color:var(--r);margin-bottom:3px;}
+.wf{font-size:12px;color:#888;}
+
+/* ── INPUTS ── */
+.num-in{background:var(--s3);border:1px solid var(--bd2);border-radius:6px;padding:7px 10px;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--y);width:100px;text-align:right;outline:none;transition:border-color .15s;}
+.num-in:focus{border-color:var(--y);}
+.notes-area{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;font-size:13px;color:var(--t);font-family:var(--sans);line-height:1.6;resize:vertical;min-height:80px;outline:none;transition:border-color .15s;}
+.notes-area:focus{border-color:var(--y);}
+.nl{font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:5px;}
+.exp-editable{background:transparent;border:none;border-bottom:1px solid var(--bd2);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--y);width:80px;text-align:right;outline:none;padding:2px 4px;}
+.exp-editable:focus{border-bottom-color:var(--y);}
+.ref-name-input{background:transparent;border:none;border-bottom:1px solid var(--bd2);font-size:13px;color:var(--t);font-family:var(--sans);width:100%;outline:none;padding:2px 0;margin-bottom:4px;}
+.ref-name-input:focus{border-bottom-color:var(--y);}
+.ref-status-sel{background:var(--s3);border:1px solid var(--bd2);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--mt);padding:3px 6px;outline:none;cursor:pointer;}
+
+/* ── BUTTONS ── */
+.btn-y{background:var(--y);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 18px;border:none;border-radius:6px;cursor:pointer;letter-spacing:1px;transition:all .15s;}
+.btn-y:hover{background:#fff;}
+.btn-ghost{background:var(--s3);color:var(--mt);font-family:var(--mono);font-size:11px;padding:7px 14px;border:1px solid var(--bd2);border-radius:5px;cursor:pointer;transition:all .15s;}
+.btn-ghost:hover{border-color:var(--y);color:var(--y);}
+
+/* ── TAGS ── */
+.tag{display:inline-block;font-size:10px;font-family:var(--mono);padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+.tgd{background:rgba(255,217,61,.1);color:var(--y);}
+.tgw{background:rgba(77,159,255,.1);color:var(--b);}
+.tge{background:rgba(181,123,255,.1);color:var(--p);}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;}
+.bg-js{background:rgba(199,125,255,.1);color:var(--p);}
+.bg-gs{background:rgba(77,150,255,.1);color:var(--b);}
+.bg-sw{background:rgba(107,203,119,.1);color:var(--g);}
+.bg-rm{background:rgba(255,217,61,.1);color:var(--y);}
+
+/* ── CHECKLIST ── */
+.check-row{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--s2);border-radius:8px;margin-bottom:7px;border:1px solid var(--bd);cursor:pointer;transition:all .15s;user-select:none;}
+.check-row:hover{border-color:var(--bd2);}
+.check-row.done{opacity:.4;}
+.check-row.done .chk{background:var(--y);border-color:var(--y);}
+.check-row.done .chk::after{content:'✓';font-size:10px;color:#000;font-weight:700;}
+.chk{width:18px;height:18px;border-radius:50%;border:2px solid var(--bd2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.chk-label{font-size:13px;flex:1;}
+.chk-badge{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;flex-shrink:0;}
+
+/* ── CONTENT TYPE ── */
+.ct-card{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.ct-card:hover{border-color:var(--bd2);transform:translateY(-1px);}
+.ct-card.selected{border-color:var(--y);}
+.ct-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.ct-badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700;flex-shrink:0;}
+.ct-name{font-size:14px;font-weight:700;flex:1;}
+.ct-freq{font-family:var(--mono);font-size:10px;color:var(--mt);}
+.ct-desc{font-size:12px;color:#888;line-height:1.5;margin-bottom:6px;}
+.ct-example{font-size:12px;color:var(--y);border-left:2px solid rgba(255,217,61,.3);padding-left:8px;}
+.ct-when{font-size:11px;color:var(--mt);margin-top:5px;font-family:var(--mono);}
+
+/* ── UPLOAD ── */
+.upload-area{border:2px dashed var(--bd2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:10px;}
+.upload-area:hover{border-color:var(--y);background:rgba(255,217,61,.02);}
+.uploaded-img{max-width:100%;border-radius:8px;margin-top:8px;border:1px solid var(--bd);}
+
+/* ── REFERRAL ── */
+.ref-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;}
+.ref-num{font-family:var(--mono);font-size:18px;font-weight:700;width:28px;color:var(--dim);flex-shrink:0;}
+.ref-num.active{color:var(--y);}
+.ref-rm{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--g);flex-shrink:0;}
+.ref-rm.empty{color:var(--dim);}
+
+/* ── THAILAND ── */
+.thailand-card{background:linear-gradient(135deg,#111 0%,#0d1a0d 100%);border:1px solid rgba(107,203,119,.2);border-radius:10px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden;}
+.thailand-card::before{content:'✈️';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:48px;opacity:.08;}
+.thai-saved-input{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--g);background:transparent;border:none;outline:none;width:200px;cursor:pointer;}
+.thai-bar-track{height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin:10px 0 6px;}
+.thai-bar-fill{height:100%;background:linear-gradient(90deg,var(--g),#a8e6cf);border-radius:4px;transition:width .8s;}
+
+/* ── EXPENSE TABLE ── */
+.exp-table{width:100%;border-collapse:collapse;}
+.exp-table th{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--mt);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);}
+.exp-table td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+.exp-table tr:last-child td{border-bottom:none;}
+.cat{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;}
+.cat-need{background:rgba(77,150,255,.1);color:var(--b);}
+.cat-want{background:rgba(255,107,107,.1);color:var(--r);}
+.cat-save{background:rgba(107,203,119,.1);color:var(--g);}
+.cat-inv{background:rgba(255,217,61,.1);color:var(--y);}
+.dot-ok{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);}
+.dot-warn{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--r);animation:blink 1s infinite;}
+
+/* ── URGENT ── */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.urgent-row{display:flex;align-items:flex-start;gap:8px;padding:10px;background:var(--s2);border:1px solid rgba(255,107,107,.2);border-radius:8px;margin-bottom:7px;animation:fadeIn .2s ease;}
+.urg-time{background:var(--s3);border:1px solid var(--bd2);border-radius:5px;padding:5px 8px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--o);width:78px;text-align:center;outline:none;flex-shrink:0;}
+.urg-time:focus{border-color:var(--o);}
+.urg-text{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd2);font-size:13px;color:var(--t);font-family:var(--sans);outline:none;padding:4px 0;resize:none;height:28px;}
+.urg-text:focus{border-bottom-color:var(--r);}
+.urg-del{background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer;padding:2px 6px;flex-shrink:0;transition:color .15s;margin-top:2px;}
+.urg-del:hover{color:var(--r);}
+.urg-priority{font-family:var(--mono);font-size:10px;padding:3px 7px;border-radius:3px;cursor:pointer;flex-shrink:0;border:1px solid;transition:all .15s;}
+
+/* ── PRGS ── */
+.prg-wrap{margin-bottom:12px;}
+.prg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.prg-title{font-size:13px;font-weight:600;}
+.prg-tr{background:var(--bd);border-radius:4px;height:6px;}
+.prg-fi{background:linear-gradient(90deg,var(--y),var(--g));height:6px;border-radius:4px;}
+.prg-note{font-size:11px;color:var(--mt);margin-top:5px;}
+
+/* ── FOLLOWER ── */
+.fol-bar-track{height:8px;background:var(--s3);border-radius:4px;margin:12px 0 6px;overflow:hidden;}
+.fol-bar-fill{height:100%;background:linear-gradient(90deg,var(--y),var(--o));border-radius:4px;transition:width .8s;}
+.milestone-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:8px;margin-bottom:7px;border:1px solid var(--bd);}
+.ms-num{font-family:var(--mono);font-size:16px;font-weight:700;width:55px;flex-shrink:0;}
+.ms-bar-track{flex:1;height:4px;background:var(--s3);border-radius:2px;}
+.ms-bar-fill{height:100%;border-radius:2px;background:var(--y);}
+.ms-status{font-family:var(--mono);font-size:11px;flex-shrink:0;width:70px;text-align:right;}
+
+/* ── IDEA BOX ── */
+.idea-box{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:13px;margin-bottom:8px;}
+.idea-type{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;display:inline-block;margin-bottom:7px;}
+.idea-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+.idea-hook{font-size:12px;color:var(--mt);line-height:1.5;}
+.idea-hook span{color:var(--y);}
+
+/* ── WEEKLY TABLE ── */
+.week-table{width:100%;border-collapse:collapse;}
+.week-table th{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--mt);padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd);text-transform:uppercase;}
+.week-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:top;font-size:12px;}
+.week-table tr:last-child td{border-bottom:none;}
+.week-table tr.today-row td:first-child{border-left:2px solid var(--y);}
+.content-pill{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;margin:2px 2px 2px 0;}
+.class-pill{background:rgba(77,150,255,.1);color:var(--b);font-family:var(--mono);font-size:10px;}
+
+/* ── ALLOC ── */
+.alloc-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.alloc-bar-track{flex:2;height:5px;background:var(--s3);border-radius:3px;}
+.alloc-bar-fill{height:100%;border-radius:3px;}
+
+/* ── FLASH ── */
+.flash{position:fixed;bottom:20px;right:20px;background:var(--y);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:10px 16px;border-radius:6px;transform:translateY(60px);opacity:0;transition:all .3s;z-index:999;}
+.flash.show{transform:translateY(0);opacity:1;}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:32px 0 80px;font-family:var(--mono);font-size:10px;color:var(--dim);}
+
+/* ── AUDIO PLAYER ── */
+.audio-bar{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(8,8,9,.97);backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:8px 16px;padding-bottom:calc(8px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;}
+.audio-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:var(--y);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.audio-btn:hover{background:rgba(255,217,61,.2);}
+.audio-track{font-family:var(--mono);font-size:10px;color:var(--mt);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.audio-track span{color:var(--y);}
+.audio-vol{width:60px;accent-color:var(--y);}
+.audio-wave{display:flex;align-items:center;gap:2px;height:16px;flex-shrink:0;}
+.audio-wave .bar{width:3px;border-radius:2px;background:var(--y);opacity:.6;animation:wave 1.2s ease-in-out infinite;}
+.audio-wave .bar:nth-child(1){height:4px;animation-delay:0s;}
+.audio-wave .bar:nth-child(2){height:10px;animation-delay:.2s;}
+.audio-wave .bar:nth-child(3){height:6px;animation-delay:.4s;}
+.audio-wave .bar:nth-child(4){height:12px;animation-delay:.1s;}
+.audio-wave .bar:nth-child(5){height:5px;animation-delay:.3s;}
+.audio-wave.paused .bar{animation:none;height:3px;}
+@keyframes wave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.8)}}
+
+/* ── CALENDAR EVENTS ── */
+.cal-event{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--s2);border-radius:8px;margin-bottom:7px;border-left:3px solid var(--b);}
+.cal-event.urgent{border-left-color:var(--r);}
+.cal-time{font-family:var(--mono);font-size:11px;color:var(--b);width:55px;flex-shrink:0;margin-top:1px;}
+.cal-title{font-size:13px;font-weight:600;flex:1;}
+.cal-desc{font-size:11px;color:var(--mt);margin-top:2px;}
+.cal-loading{font-family:var(--mono);font-size:12px;color:var(--mt);padding:12px 0;display:flex;align-items:center;gap:8px;}
+.cal-loading::before{content:'';width:12px;height:12px;border:2px solid var(--bd2);border-top-color:var(--y);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.notif-toast{position:fixed;top:calc(60px + env(safe-area-inset-top));right:16px;z-index:500;background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateX(320px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.notif-toast.show{transform:translateX(0);opacity:1;}
+.notif-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.notif-body{font-size:12px;color:var(--mt);}
+.notif-time{font-family:var(--mono);font-size:10px;color:var(--y);margin-top:4px;}
+
+/* ── BUFFETT ── */
+.buffett{background:rgba(255,217,61,.03);border:1px solid rgba(255,217,61,.1);border-radius:8px;padding:12px 13px;margin-bottom:9px;display:flex;gap:9px;align-items:flex-start;}
+.buffett-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.buffett-text{font-size:12px;color:var(--mt);line-height:1.5;}
+.buffett-text strong{color:var(--y);}
+
+/* ── ROLE PILL ── */
+.role-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;margin:0 5px 5px 0;}
+
+/* ── TODAY BADGE ── */
+.today-badge-hdr{background:rgba(255,217,61,.08);border:1px solid rgba(255,217,61,.2);border-radius:8px;padding:8px 14px;font-family:var(--mono);font-size:11px;color:var(--y);text-align:right;flex-shrink:0;}
+
+/* ── INPUT ROW ── */
+.input-row{display:flex;align-items:center;gap:10px;padding:11px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px;}
+.input-row label{font-size:13px;flex:1;color:#ccc;}
+.input-row .sub{font-family:var(--mono);font-size:10px;color:var(--mt);display:block;margin-top:2px;}
+.rm-prefix{font-family:var(--mono);font-size:11px;color:var(--mt);flex-shrink:0;}
+
+/* ── SCHED ── */
+.sched-row{display:flex;gap:0;margin-bottom:0;}
+.sched-time{font-family:var(--mono);font-size:11px;color:var(--y);width:65px;flex-shrink:0;padding-top:11px;}
+.sched-line{display:flex;flex-direction:column;align-items:center;margin-right:12px;}
+.sched-dot{width:10px;height:10px;border-radius:50%;background:var(--y);flex-shrink:0;margin-top:13px;}
+.sched-bar{width:2px;background:var(--bd);flex:1;margin-top:2px;}
+.sched-content{flex:1;padding:7px 11px;background:var(--s2);border-radius:8px;margin-bottom:7px;border:1px solid var(--bd);}
+.sched-content .sc-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.sched-content .sc-desc{font-size:11px;color:var(--mt);}
+.sched-dot.js{background:var(--p);}
+.sched-dot.gs{background:var(--b);}
+.sched-dot.sw{background:var(--g);}
+.sched-dot.money{background:var(--y);}
+.sched-dot.rest{background:var(--dim);}
+
+/* ── VIRAL ── */
+.viral-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--r);font-weight:600;margin-bottom:12px;}
+.viral-dot{width:7px;height:7px;border-radius:50%;background:var(--r);animation:blink 1.2s infinite;}
+.threshold-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.th-item{background:var(--s2);border-radius:8px;padding:12px;border:1px solid var(--bd);text-align:center;}
+.th-num{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--y);}
+.th-label{font-size:11px;color:var(--mt);margin-top:3px;}
+.th-item.hot .th-num{color:var(--r);}
+.th-item.hot{border-color:rgba(255,107,107,.2);}
+
+/* ── LAST UPDATE ── */
+.last-update{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:5px;}
+.ev-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ TOP NAV ═══════════════ -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <div class="nav-logo">WAI<span>.SYS</span></div>
+    <button class="nb on"  onclick="showSection('overview',this)">🏠 总览</button>
+    <button class="nb"     onclick="showSection('schedule',this)">⏰ 行程</button>
+    <button class="nb section-start" onclick="showSection('gs',this)">📱 JS/GS</button>
+    <button class="nb"     onclick="showSection('event',this)">🎪 JS Run</button>
+    <button class="nb section-start" onclick="showSection('personal',this)">👤 个人品牌</button>
+    <button class="nb section-start" onclick="showSection('income',this)">💰 收入</button>
+    <button class="nb section-start" onclick="showSection('viral',this)">🔥 Viral</button>
+    <button class="nb"     onclick="showSection('notes',this)">📝 笔记</button>
+    <button id="install-btn" onclick="installApp()" style="display:none;margin-left:auto;flex-shrink:0;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:11px;font-weight:700;color:#000;background:var(--y);border:none;cursor:pointer;white-space:nowrap;">⬇ 安装App</button>
+  </div>
+</nav>
+
+<!-- ═══════════════ SUB NAVS ═══════════════ -->
+<div id="subnav-personal" class="sub-nav">
+  <div class="sub-nav-inner">
+    <button class="sb on" onclick="showSub('personal','today',this)">今天</button>
+    <button class="sb" onclick="showSub('personal','weekly',this)">本周计划</button>
+    <button class="sb" onclick="showSub('personal','content',this)">5种内容</button>
+    <button class="sb" onclick="showSub('personal','growth',this)">粉丝追踪</button>
+    <button class="sb" onclick="showSub('personal','ideas',this)">内容灵感</button>
+    <button class="sb" onclick="showSub('personal','upload',this)">上传记录</button>
+  </div>
+</div>
+<div id="subnav-income" class="sub-nav">
+  <div class="sub-nav-inner">
+    <button class="sb on" onclick="showSub('income','overview',this)">总览</button>
+    <button class="sb" onclick="showSub('income','update',this)">收入Update</button>
+    <button class="sb" onclick="showSub('income','expenses',this)">Expenses</button>
+    <button class="sb" onclick="showSub('income','referral',this)">Referral追踪</button>
+    <button class="sb" onclick="showSub('income','thailand',this)">泰国基金</button>
+    <button class="sb" onclick="showSub('income','allocation',this)">资金分配</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║         总览 OVERVIEW        ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-overview" class="section on">
+  <div class="stag">大画面</div>
+  <div class="stitle">WAI — Master OS</div>
+
+  <div class="card">
+    <div class="clabel">你现在的角色</div>
+    <span class="role-pill" style="background:rgba(77,150,255,.1);color:var(--b);border:1px solid rgba(77,150,255,.2);">📱 SMM — JS Tradventures</span>
+    <span class="role-pill" style="background:rgba(255,165,82,.1);color:var(--o);border:1px solid rgba(255,165,82,.2);">🎪 PIC — JS Run Event</span>
+    <span class="role-pill" style="background:rgba(107,203,119,.1);color:var(--g);border:1px solid rgba(107,203,119,.2);">👤 Creator — @sw_041230</span>
+    <span class="role-pill" style="background:rgba(255,217,61,.1);color:var(--y);border:1px solid rgba(255,217,61,.2);">💰 Referral + Trading</span>
+    <div style="margin-top:8px;font-size:12px;color:var(--mt);">团队：Jason + 3–4人 ｜ 7:00am起 — 12:00am睡 ｜ 大学生（Fin/ENT/MGT）</div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">🎯 终极目标 — 今年底</div>
+    <div class="g2">
+      <div class="gb"><div class="gi">✈️</div><div class="gl">家庭旅行</div><div class="gv">存到 <span class="hl">RM18,000</span><br>6人去泰国（明年6月）</div></div>
+      <div class="gb"><div class="gi">🔓</div><div class="gl">自由系统</div><div class="gv">不依赖<span class="hl">固定工作</span>收入</div></div>
+      <div class="gb"><div class="gi">💰</div><div class="gl">月收入目标</div><div class="gv"><span class="hl">RM5K–8K</span> 每月稳定</div></div>
+      <div class="gb"><div class="gi">🎬</div><div class="gl">JS视频目标</div><div class="gv">每条 <span class="hl">200K views</span><br>before 7月1日</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📅 3个月里程碑</div>
+    <div class="mtrack">
+      <div class="mi now"><div class="mdot">▶ MAY</div><div class="mmo">现在</div><div class="mg">GS系统稳定<br><span class="hi">Referral 1–2单</span><br>JS Run筹备开始</div></div>
+      <div class="mi nxt"><div class="mdot">◎ JUNE</div><div class="mmo">下个月</div><div class="mg">JS Run活动执行<br><span class="hi">Referral 3单/月</span><br>视频冲200K</div></div>
+      <div class="mi"><div class="mdot">○ JULY</div><div class="mmo">两个月后</div><div class="mg">收入稳定<br><span class="hi">RM5K+/月</span><br>IG 1500粉</div></div>
+    </div>
+  </div>
+
+  <div class="hb">
+    <div class="hbl">⚡ MAY 焦点</div>
+    <div class="hbt">
+      <strong>P1：</strong>JS/GS — 每天2–3 carousel，每周script稳定output<br>
+      <strong>P2：</strong>JS Run — 每周推进一件筹备任务<br>
+      <strong>P3：</strong>Referral — 每周接触3个leads，不能停<br>
+      <strong>P4：</strong>个人品牌 — 低effort也发，不能断
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">⚠️ 弱点 → 对策</div>
+    <div class="wi"><div class="wt">太舒服就失速</div><div class="wf">每周设一个hard deadline，没完成就问自己为什么</div></div>
+    <div class="wi"><div class="wt">依赖外部方向</div><div class="wf">先自己想答案，再来找我确认</div></div>
+    <div class="wi"><div class="wt">想太多做太少</div><div class="wf">每天最多3件事，做完再加</div></div>
+    <div class="wi"><div class="wt">同时做太多</div><div class="wf">每个时段只有一个焦点</div></div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║         行程 SCHEDULE        ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-schedule" class="section">
+  <div class="stag">每日行程</div>
+  <div class="stitle">7:00am — 12:00am <span style="font-size:14px;color:var(--mt);font-weight:400;" id="sched-today-label"></span></div>
+
+  <div class="hb">
+    <div class="hbl">今天课表</div>
+    <div class="hbt" id="sched-class-text">读取中...</div>
+  </div>
+
+
+  <div class="card" id="cal-card">
+    <div class="clabel" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📅 Google Calendar — 今天事件</span>
+      <button class="btn-ghost" onclick="refreshCalendar()" style="font-size:10px;padding:4px 10px;" id="cal-refresh-btn">↻ 刷新</button>
+    </div>
+    <div id="cal-events-list"><div class="cal-loading">正在读取 Google Calendar...</div></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px;" id="cal-last-sync"></div>
+  </div>
+  <div class="card">
+    <div class="clabel">今日时间表（根据你的课自动调整）</div>
+    <div style="padding-left:80px;position:relative;">
+      <div id="sched-timeline"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📆 每周节奏</div>
+    <div class="tr"><div class="tt">MON</div><div class="td"><strong>本周计划</strong> — GS排期 + JS topic决定 + Referral名单更新</div></div>
+    <div class="tr"><div class="tt">TUE–WED</div><div class="td"><strong>执行高峰</strong> — script写作、carousel产出、团队push</div></div>
+    <div class="tr"><div class="tt">THU</div><div class="td"><strong>检查 + 调整</strong> — 本周进度怎样？有没有落后？</div></div>
+    <div class="tr"><div class="tt">FRI</div><div class="td"><strong>数据日</strong> — GS表现 + 个人IG增长 + 月收入进度核对</div></div>
+    <div class="tr"><div class="tt">SAT–SUN</div><div class="td"><strong>追热点 + 下周备稿</strong> — 时事内容趁热发</div></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>⚡ 今日紧急加入</span>
+      <button class="btn-ghost" onclick="addUrgentRow()" style="font-size:10px;padding:4px 10px;">+ 加事件</button>
+    </div>
+    <div id="urgent-list2"></div>
+    <div id="urgent-empty2" style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px 0;">今天暂无突发事件</div>
+    <div id="urgent-impact2" style="display:none;margin-top:8px;padding:10px;background:rgba(255,107,107,.05);border:1px solid rgba(255,107,107,.15);border-radius:7px;font-size:12px;color:#ccc;" id="urgent-advice2"></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">✅ 今日必做清单</div>
+    <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label"><span class="badge bg-gs">JS/GS</span> 今天carousel产出/发帖</div></div>
+    <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label"><span class="badge bg-js">JS</span> 推进一个script或topic</div></div>
+    <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label"><span class="badge bg-sw">SW</span> 发一条个人IG post</div></div>
+    <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label"><span class="badge bg-rm">💰</span> 联系或跟进1个referral lead</div></div>
+    <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label">睡前：写下明天第一件事</div></div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║         GS/JS CONTENT        ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-gs" class="section">
+  <div class="stag">JS Tradventures / GS</div>
+  <div class="stitle">SMM 内容系统</div>
+
+  <div class="hb">
+    <div class="hbl">核心目标</div>
+    <div class="hbt">每条视频 <strong>200K Views</strong> before 2026年7月1日 ｜ 现状：有20K，有180K+，差距在topic + hook + 时机</div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">🎯 冲200K关键</div>
+    <div class="task"><div class="tdot" style="background:var(--r)"></div><div class="tx"><strong>前3秒决定一切</strong> — Hook必须在0–3秒内抓住人，算法看3秒留存率</div></div>
+    <div class="task"><div class="tdot" style="background:var(--y)"></div><div class="tx"><strong>DM分享率 = 最强信号</strong> — 内容要让人想说"发给你看"，算法会大推</div></div>
+    <div class="task"><div class="tdot" style="background:var(--g)"></div><div class="tx"><strong>发布后1小时内互动</strong> — 第一小时engagement决定80%后续推量，发出去马上回评论</div></div>
+    <div class="task"><div class="tdot" style="background:var(--b)"></div><div class="tx"><strong>时事topic + 24小时内发</strong> — 热点超过48小时算法不推了</div></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📋 每日/每周任务</div>
+    <div class="task"><div class="tdot"></div><div class="tx"><strong>每天2–3个Carousel Post</strong> <span class="tag tgd">每天</span></div></div>
+    <div class="task"><div class="tdot"></div><div class="tx"><strong>Script产出</strong> — 每周1–2条 <span class="tag tgw">每周</span></div></div>
+    <div class="task"><div class="tdot"></div><div class="tx"><strong>带团队（3–4人）</strong> — 给方向+每周check质量 <span class="tag tgw">每周</span></div></div>
+    <div class="task"><div class="tdot"></div><div class="tx"><strong>Reel表现分析</strong> — 哪个format/topic好，记录 <span class="tag tgw">每周五</span></div></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">🎬 Script规则</div>
+    <div class="task"><div class="tdot" style="background:var(--p)"></div><div class="tx"><strong>中文 = Jason念的</strong>，英文 = 逻辑注释（不读出来）</div></div>
+    <div class="task"><div class="tdot" style="background:var(--p)"></div><div class="tx"><strong>简单中文</strong> — Jason中文弱，禁止复杂词汇</div></div>
+    <div class="task"><div class="tdot" style="background:var(--p)"></div><div class="tx"><strong>CTA</strong>："Comment '[关键词]'，免费发你[资源名]" — 每条不同，2–3秒</div></div>
+    <div class="task"><div class="tdot" style="background:var(--p)"></div><div class="tx"><strong>时事类Hook</strong> → 10角度→10风格→5hooks选一</div></div>
+    <div class="task"><div class="tdot" style="background:var(--p)"></div><div class="tx"><strong>案例类Hook</strong> → 事件+数字+结果 → "但背后为什么？" → "有X个原因"</div></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📝 JS急事记录</div>
+    <div class="nl">今天JS有什么急事 / 新想法：</div>
+    <textarea class="notes-area" id="gs-notes" placeholder="今天要跟进什么？Jason说了什么？有什么新topic idea？"></textarea>
+    <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-gs').click()">
+      <div style="font-size:18px;margin-bottom:4px;">📎</div>
+      <div class="up-text" style="font-size:12px;color:var(--mt);">上传截图 / 参考资料</div>
+    </div>
+    <input type="file" id="fi-gs" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'gs-preview')">
+    <div id="gs-preview"></div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║         JS RUN EVENT         ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-event" class="section">
+  <div class="stag">活动策划</div>
+  <div class="stitle">JS Run — 你是PIC</div>
+
+  <div class="hb">
+    <div class="hbl">你的角色</div>
+    <div class="hbt"><strong>PIC（Person in Charge）</strong> — 场地、内容、全部都是你负责。两个人一起行动。</div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📅 筹备原则</div>
+    <div class="tr"><div class="tt">每周</div><div class="td"><strong>至少推进一件筹备任务</strong> — 不要什么都留到最后</div></div>
+    <div class="tr"><div class="tt">活动前2周</div><div class="td"><strong>宣传内容准备好</strong> — IG post、stories、预告片</div></div>
+    <div class="tr"><div class="tt">活动前1周</div><div class="td"><strong>所有logistics确认</strong> — 场地、设备、人手分工</div></div>
+    <div class="tr"><div class="tt">活动当天</div><div class="td"><strong>拍摄内容</strong> — 现场素材、highlights、后续repurpose</div></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📝 活动笔记（随时打字）</div>
+    <div class="nl">场地想法：</div>
+    <textarea class="notes-area" id="ev-venue" placeholder="场地：哪里？多少人？预算？" style="min-height:60px;margin-bottom:10px;"></textarea>
+    <div class="nl">活动内容 / 流程：</div>
+    <textarea class="notes-area" id="ev-content" placeholder="活动里要有什么？流程怎么走？" style="min-height:60px;margin-bottom:10px;"></textarea>
+    <div class="nl">本周筹备待办：</div>
+    <textarea class="notes-area" id="ev-todo" placeholder="这周最急需要做的事：&#10;例：联系场地A、确认人数、设计宣传图"></textarea>
+    <div style="margin-top:10px;">
+      <div class="upload-area" onclick="document.getElementById('fi-event').click()">
+        <div style="font-size:18px;margin-bottom:4px;">📎</div>
+        <div style="font-size:12px;color:var(--mt);">上传活动相关截图 / 资料</div>
+      </div>
+      <input type="file" id="fi-event" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'event-preview')">
+      <div id="event-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║       个人品牌 PERSONAL       ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-personal" class="section">
+
+  <!-- TODAY -->
+  <div id="personal-today" class="sub-pg on">
+    <div class="stag">个人品牌</div>
+    <div class="stitle">@sw_041230 — 今天</div>
+
+    <div class="hb" id="sw-class-banner">
+      <div class="hbl" id="sw-banner-label">今天行程</div>
+      <div class="hbt" id="sw-banner-text">读取中...</div>
+    </div>
+
+    <div class="card">
+      <div class="clabel">今天要发什么 — 已决定好</div>
+      <div id="sw-today-task"></div>
+    </div>
+
+    <div class="card">
+      <div class="clabel">今日清单</div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label">发今天的IG post（15–20分钟搞定）</div><div class="chk-badge" style="background:rgba(107,203,119,.1);color:var(--g);">必做</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label">写Caption（至少50字，有CTA）</div><div class="chk-badge" style="background:rgba(107,203,119,.1);color:var(--g);">必做</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label">加hashtag（金融相关 + 马来西亚）</div><div class="chk-badge" style="background:rgba(77,150,255,.1);color:var(--b);">重要</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="chk"></div><div class="chk-label">发出后30分钟内回复评论</div><div class="chk-badge" style="background:rgba(77,150,255,.1);color:var(--b);">重要</div></div>
+    </div>
+
+    <div class="card" style="border-color:rgba(255,107,107,.25);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--r);animation:blink 1s infinite;"></div>
+          <div class="clabel" style="margin-bottom:0;color:var(--r);">今日紧急加入</div>
+        </div>
+        <button class="btn-ghost" onclick="addUrgentRow()" style="border-color:rgba(255,107,107,.3);color:var(--r);font-size:10px;padding:4px 10px;">+ 加事件</button>
+      </div>
+      <div id="urgent-list"></div>
+      <div id="urgent-empty" style="font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px 0;">今天暂无突发事件</div>
+      <div id="urgent-impact" style="display:none;margin-top:8px;padding:10px;background:rgba(255,107,107,.05);border:1px solid rgba(255,107,107,.15);border-radius:7px;font-size:12px;color:#ccc;"></div>
+    </div>
+
+    <div class="card">
+      <div class="clabel">今天备注 / 想法</div>
+      <textarea class="notes-area" id="today-note" placeholder="今天发的是什么？反应怎样？"></textarea>
+      <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-today-sw').click()">
+        <div style="font-size:18px;margin-bottom:4px;">📱</div>
+        <div style="font-size:12px;color:var(--mt);">上传今天的post截图</div>
+      </div>
+      <input type="file" id="fi-today-sw" accept="image/*" style="display:none;" onchange="previewImg(this,'sw-today-preview')">
+      <div id="sw-today-preview"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY -->
+  <div id="personal-weekly" class="sub-pg">
+    <div class="stag">个人品牌</div><div class="stitle">本周内容计划</div>
+    <div class="hb"><div class="hbl">已考虑课表</div><div class="hbt">周二5节课，最低effort。其他天正常执行。</div></div>
+    <div class="card">
+      <div class="clabel">本周每天发什么</div>
+      <table class="week-table">
+        <thead><tr><th>日期</th><th>课</th><th>内容类型</th><th>具体做什么</th><th>时间</th></tr></thead>
+        <tbody>
+          <tr><td><strong>周日</strong></td><td style="color:var(--g);font-size:11px;">无课 ✓</td><td><span class="content-pill" style="background:rgba(199,125,255,.1);color:var(--p);">Personal Story</span></td><td>真实经历视频，RM900故事</td><td style="font-family:var(--mono);font-size:11px;color:var(--mt);">30–45分</td></tr>
+          <tr><td><strong>周一</strong></td><td style="font-size:11px;"><span class="class-pill">ENT 8am</span><br><span class="class-pill">MGT 4–6pm</span></td><td><span class="content-pill" style="background:rgba(255,107,107,.1);color:var(--r);">Caption Trap</span></td><td>4pm课前发。小钱×时间公式。</td><td style="font-family:var(--mono);font-size:11px;color:var(--g);">15分</td></tr>
+          <tr><td><strong>周二</strong></td><td style="font-size:11px;"><span class="class-pill" style="color:var(--r);">5节课⚠️</span></td><td><span class="content-pill" style="background:rgba(255,107,107,.1);color:var(--r);">Caption Trap</span></td><td><strong style="color:var(--r);">最低effort。</strong>7am提前发，剩下时间上课。</td><td style="font-family:var(--mono);font-size:11px;color:var(--g);">5分</td></tr>
+          <tr><td><strong>周三</strong></td><td style="font-size:11px;"><span class="class-pill">FIN3154 12–2pm</span></td><td><span class="content-pill" style="background:rgba(107,203,119,.1);color:var(--g);">Left Right</span></td><td>课后做。左右对比数字，本地产品对比。</td><td style="font-family:var(--mono);font-size:11px;color:var(--mt);">20分</td></tr>
+          <tr><td><strong>周四</strong></td><td style="font-size:11px;"><span class="class-pill">FIN3034 12–2pm</span></td><td><span class="content-pill" style="background:rgba(77,150,255,.1);color:var(--b);">Sharing Info</span></td><td>TradingView截图+指标解释。建立权威感。</td><td style="font-family:var(--mono);font-size:11px;color:var(--mt);">25分</td></tr>
+          <tr><td><strong>周五</strong></td><td style="font-size:11px;"><span class="class-pill">3节课</span></td><td><span class="content-pill" style="background:rgba(255,107,107,.1);color:var(--r);">Caption Trap</span></td><td>课间空档发。发完记录本周数据。</td><td style="font-family:var(--mono);font-size:11px;color:var(--g);">15分</td></tr>
+          <tr><td><strong>周六</strong></td><td style="color:var(--g);font-size:11px;">无课 ✓</td><td><span class="content-pill" style="background:rgba(255,217,61,.1);color:var(--y);">Market Trend</span></td><td>蹭本周热点。没热点改Caption Trap。</td><td style="font-family:var(--mono);font-size:11px;color:var(--mt);">10–20分</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="clabel">本周表现记录（每周五填）</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="input-row"><label>本周新增粉丝</label><input type="number" class="num-in" id="w-followers" placeholder="0"><span style="font-family:var(--mono);font-size:11px;color:var(--mt);">人</span></div>
+        <div class="input-row"><label>本周最高views</label><input type="number" class="num-in" id="w-topviews" placeholder="0"><span style="font-family:var(--mono);font-size:11px;color:var(--mt);">views</span></div>
+        <div class="input-row"><label>发了几条</label><input type="number" class="num-in" id="w-posts" placeholder="0"><span style="font-family:var(--mono);font-size:11px;color:var(--mt);">条</span></div>
+      </div>
+      <div style="margin-top:10px;"><div class="nl">本周最好的内容：</div><textarea class="notes-area" id="w-best" placeholder="哪条效果最好？什么类型？什么topic？"></textarea></div>
+      <button class="btn-y" style="margin-top:10px;" onclick="saveWeekly()">💾 保存</button>
+    </div>
+  </div>
+
+  <!-- CONTENT TYPES -->
+  <div id="personal-content" class="sub-pg">
+    <div class="stag">个人品牌</div><div class="stitle">5种内容类型</div>
+    <div class="ct-card" onclick="toggleCT(this)">
+      <div class="ct-header"><div class="ct-badge" style="background:rgba(255,107,107,.1);color:var(--r);">CAPTION TRAP</div><div class="ct-name">Caption钩子型</div><div class="ct-freq">每周2–3条 ⭐主力</div></div>
+      <div class="ct-desc">视频5–15秒只有hook，内容在Caption里。最低effort，最高产量。</div>
+      <div class="ct-example">例："每天RM10咖啡 × 365 = RM3,650消失了"</div>
+      <div class="ct-when">⏱ 任何时候，特别是忙的日子。提前做好，定时发。</div>
+      <div style="display:none;" class="ct-detail"><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:#ccc;line-height:1.8;"><strong style="color:#fff;">公式：</strong>小钱 × 时间 = 惊人总数<br><strong style="color:#fff;">Caption：</strong>开头共鸣 → 编号列出 → 每点有RM数字 → CTA</div></div>
+    </div>
+    <div class="ct-card" onclick="toggleCT(this)">
+      <div class="ct-header"><div class="ct-badge" style="background:rgba(107,203,119,.1);color:var(--g);">LEFT RIGHT</div><div class="ct-name">左右对比数字型</div><div class="ct-freq">每周1–2条</div></div>
+      <div class="ct-desc">分屏，同一笔钱两种选择，逐年数字对比。7–9秒，DM分享率最高。</div>
+      <div class="ct-example">例：RM1000/年 → Ryt Bank(4%) VS Maybank FD(3%)</div>
+      <div class="ct-when">⏱ 周三/周四有空档时做。需要提前算好数字。</div>
+      <div style="display:none;" class="ct-detail"><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:#ccc;line-height:1.8;"><strong style="color:#fff;">必须有：</strong>真实马来西亚产品数字（Ryt/EPF/Maybank）<br><strong style="color:#fff;">结尾：</strong>"记得读下面Caption"字幕</div></div>
+    </div>
+    <div class="ct-card" onclick="toggleCT(this)">
+      <div class="ct-header"><div class="ct-badge" style="background:rgba(255,217,61,.1);color:var(--y);">MARKET TREND</div><div class="ct-name">时事搞笑型</div><div class="ct-freq">热点时立刻发</div></div>
+      <div class="ct-desc">蹭热点，搞笑评论时事/市场。24–48小时内发，Caption超短。病毒传播最强。</div>
+      <div class="ct-example">例：油价涨 → "现在打油就像去Rolex" 😂</div>
+      <div class="ct-when">⏱ 热点出现就做，不要等。周末最多热点。</div>
+      <div style="display:none;" class="ct-detail"><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:#ccc;line-height:1.8;"><strong style="color:#fff;">格式A：</strong>本人出镜吐槽 | <strong style="color:#fff;">格式B：</strong>POV+AI图（无需出镜）<br><strong style="color:#fff;">语气：</strong>像WhatsApp跟朋友吐槽，可以用lah/weh</div></div>
+    </div>
+    <div class="ct-card" onclick="toggleCT(this)">
+      <div class="ct-header"><div class="ct-badge" style="background:rgba(77,150,255,.1);color:var(--b);">SHARING INFO</div><div class="ct-name">数据分享型</div><div class="ct-freq">每周1条</div></div>
+      <div class="ct-desc">真实TradingView图表+简单阈值解释。保存率最高，建立权威感。</div>
+      <div class="ct-example">例：VIX &lt;20 calm ｜ 20–30 紧张 ｜ &gt;30 恐慌</div>
+      <div class="ct-when">⏱ 周四下午，有连续时间时。</div>
+      <div style="display:none;" class="ct-detail"><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:#ccc;line-height:1.8;"><strong style="color:#fff;">最强指标：</strong>VIX、S&P P/E、BTC Fear&Greed、DXY<br><strong style="color:#fff;">关键：</strong>最多3个阈值，新手看得懂</div></div>
+    </div>
+    <div class="ct-card" onclick="toggleCT(this)">
+      <div class="ct-header"><div class="ct-badge" style="background:rgba(199,125,255,.1);color:var(--p);">PERSONAL STORY</div><div class="ct-name">个人故事型</div><div class="ct-freq">每2周1条 ⭐涨粉最强</div></div>
+      <div class="ct-desc">真实经历+真实数字。反互联网炫富。涨粉效果最强。</div>
+      <div class="ct-example">例："22岁，上个月从交易赚了RM900。不多，但这是真的。"</div>
+      <div class="ct-when">⏱ 周日，有充足时间时。</div>
+      <div style="display:none;" class="ct-detail"><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);font-size:12px;color:#ccc;line-height:1.8;"><strong style="color:#fff;">公式：</strong>互联网说什么 → 我的真实是什么 → 我学到什么<br><strong style="color:#fff;">绝对不要：</strong>炫富、夸大数字、空泛鸡汤</div></div>
+    </div>
+  </div>
+
+  <!-- GROWTH -->
+  <div id="personal-growth" class="sub-pg">
+    <div class="stag">个人品牌</div><div class="stitle">粉丝追踪</div>
+    <div class="card">
+      <div class="clabel">粉丝目标</div>
+      <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
+        <div><div style="font-family:var(--mono);font-size:11px;color:var(--mt);margin-bottom:4px;">目前粉丝</div><input type="number" class="num-in" id="fol-current" value="600" oninput="updateFollowers()" style="font-size:26px;width:110px;"></div>
+        <div style="padding-bottom:8px;font-family:var(--mono);font-size:22px;color:var(--mt);">→</div>
+        <div><div style="font-family:var(--mono);font-size:11px;color:var(--mt);margin-bottom:4px;">目标</div><div style="font-family:var(--mono);font-size:30px;font-weight:700;color:var(--y);">1,500</div></div>
+      </div>
+      <div class="fol-bar-track"><div class="fol-bar-fill" id="fol-bar" style="width:40%"></div></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;">
+        <span>还需要 <strong id="fol-need" style="color:var(--y);">900</strong> 粉</span>
+        <span>进度 <strong id="fol-pct" style="color:var(--g);">40%</strong></span>
+        <span>预计 <strong id="fol-weeks" style="color:var(--b);">18</strong> 周达成</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">里程碑</div>
+      <div class="milestone-row"><div class="ms-num" style="color:var(--g);">600</div><div class="ms-bar-track"><div class="ms-bar-fill" style="width:100%"></div></div><div class="ms-status" style="color:var(--g);">✓ 达成</div></div>
+      <div class="milestone-row"><div class="ms-num" id="ms-800-n">800</div><div class="ms-bar-track"><div class="ms-bar-fill" id="ms-800-b" style="width:0%"></div></div><div class="ms-status" id="ms-800-s" style="color:var(--mt);">进行中</div></div>
+      <div class="milestone-row"><div class="ms-num">1000</div><div class="ms-bar-track"><div class="ms-bar-fill" id="ms-1k-b" style="width:0%"></div></div><div class="ms-status" id="ms-1k-s" style="color:var(--mt);">锁定</div></div>
+      <div class="milestone-row"><div class="ms-num">1500</div><div class="ms-bar-track"><div class="ms-bar-fill" id="ms-15-b" style="width:0%"></div></div><div class="ms-status" style="color:var(--mt);">目标 🎯</div></div>
+    </div>
+    <div class="card">
+      <div class="clabel">每周目标</div>
+      <div class="g3">
+        <div class="stat hi"><div class="s-label">每天</div><div class="s-val">+7</div><div class="s-sub">粉丝/天</div></div>
+        <div class="stat good"><div class="s-label">每周</div><div class="s-val">+50</div><div class="s-sub">粉丝/周</div></div>
+        <div class="stat"><div class="s-label">低于警戒</div><div class="s-val warn" style="font-size:16px;">+20/周</div><div class="s-sub">换方向</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEAS -->
+  <div id="personal-ideas" class="sub-pg">
+    <div class="stag">个人品牌</div><div class="stitle">内容灵感库</div>
+    <div class="card">
+      <div class="clabel">本周可用灵感</div>
+      <div class="idea-box"><div class="idea-type" style="background:rgba(255,107,107,.1);color:var(--r);">CAPTION TRAP</div><div class="idea-title">大学生每月花在"看不见"的地方有多少？</div><div class="idea-hook">Hook：<span>"大学生每月不知道的RM800+"</span><br>Grab/外卖/Shopee/订阅/奶茶每项算出来</div></div>
+      <div class="idea-box"><div class="idea-type" style="background:rgba(107,203,119,.1);color:var(--g);">LEFT RIGHT</div><div class="idea-title">RM500月薪 → EPF自动存 vs 全部花掉</div><div class="idea-hook">Hook：<span>"10年前开始存vs没存，今天的差距"</span></div></div>
+      <div class="idea-box"><div class="idea-type" style="background:rgba(77,150,255,.1);color:var(--b);">SHARING INFO</div><div class="idea-title">市场乱的时候，我看这3个指标</div><div class="idea-hook">Hook：<span>"市场暴跌，你知道要看哪里吗？"</span><br>VIX + S&P P/E + Fear&Greed</div></div>
+      <div class="idea-box"><div class="idea-type" style="background:rgba(199,125,255,.1);color:var(--p);">PERSONAL STORY</div><div class="idea-title">我第一次亏钱的经历</div><div class="idea-hook">Hook：<span>"第一次投资，亏了多少？"</span><br>真实数字，不美化，结尾说学到什么</div></div>
+    </div>
+    <div class="card">
+      <div class="clabel">我的灵感记录</div>
+      <textarea class="notes-area" id="my-ideas" style="min-height:120px;" placeholder="今天有什么灵感？看到什么爆款？有什么topic想做？随时写在这里。"></textarea>
+      <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-ideas').click()">
+        <div style="font-size:18px;margin-bottom:4px;">📸</div>
+        <div style="font-size:12px;color:var(--mt);">上传爆款截图 / 参考内容</div>
+      </div>
+      <input type="file" id="fi-ideas" accept="image/*" style="display:none;" onchange="previewImg(this,'ideas-preview')">
+      <div id="ideas-preview"></div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div id="personal-upload" class="sub-pg">
+    <div class="stag">个人品牌</div><div class="stitle">上传记录</div>
+    <div class="card">
+      <div class="clabel">今日Post截图</div>
+      <div class="upload-area" onclick="document.getElementById('fi-post').click()"><div style="font-size:20px;margin-bottom:4px;">📱</div><div style="font-size:12px;color:var(--mt);">上传今天发的IG post截图</div></div>
+      <input type="file" id="fi-post" accept="image/*" style="display:none;" onchange="previewImg(this,'post-preview')">
+      <div id="post-preview"></div>
+      <div class="nl" style="margin-top:8px;">反应 / 数据：</div>
+      <textarea class="notes-area" id="post-note" placeholder="Views / Likes / Saves / 新粉丝？" style="min-height:60px;"></textarea>
+    </div>
+    <div class="card">
+      <div class="clabel">Insights截图</div>
+      <div class="upload-area" onclick="document.getElementById('fi-insights').click()"><div style="font-size:20px;margin-bottom:4px;">📊</div><div style="font-size:12px;color:var(--mt);">上传IG Insights截图</div></div>
+      <input type="file" id="fi-insights" accept="image/*" style="display:none;" onchange="previewImg(this,'insights-preview')">
+      <div id="insights-preview"></div>
+    </div>
+  </div>
+
+</div><!-- end sec-personal -->
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║        收入 INCOME           ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-income" class="section">
+
+  <!-- OVERVIEW -->
+  <div id="income-overview" class="sub-pg on">
+    <div class="stag">收入系统</div>
+    <div class="stitle">WAI Financial OS <span style="font-size:13px;font-weight:400;color:var(--mt);">— Warren Buffett方法</span></div>
+    <div class="buffett"><div class="buffett-icon">📌</div><div class="buffett-text"><strong>"先给自己付钱。"</strong> 收入进来 → 先存RM1,000泰国基金 → 剩下才花。不是存剩下的。</div></div>
+    <div class="g4" style="margin-bottom:12px;">
+      <div class="stat hi"><div class="s-label">本月收入</div><div class="s-val" id="ov-income">RM0</div><div class="s-sub">目标 RM5,000+</div></div>
+      <div class="stat warn"><div class="s-label">本月支出</div><div class="s-val" id="ov-exp">RM0</div><div class="s-sub">预算 RM2,500</div></div>
+      <div class="stat good"><div class="s-label">本月净存</div><div class="s-val" id="ov-net">RM0</div><div class="s-sub">目标 RM1,000+</div></div>
+      <div class="stat"><div class="s-label">泰国基金</div><div class="s-val" id="ov-thai" style="color:var(--g);">RM0</div><div class="s-sub">目标 RM13,000</div></div>
+    </div>
+    <div class="card">
+      <div class="clabel">每日目标</div>
+      <div class="g3">
+        <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:13px;text-align:center;"><div style="font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:5px;">每日收入目标</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--y);">RM167</div><div style="font-size:11px;color:var(--mt);">= RM5K ÷ 30天</div></div>
+        <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:13px;text-align:center;"><div style="font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:5px;">每日存泰国基金</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--g);">RM33</div><div style="font-size:11px;color:var(--mt);">= RM1K ÷ 30天</div></div>
+        <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:13px;text-align:center;"><div style="font-family:var(--mono);font-size:10px;color:var(--mt);margin-bottom:5px;">每日Referral</div><div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--b);">1 contact</div><div style="font-size:11px;color:var(--mt);">= 每月3单</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">本月收入进度</div>
+      <div class="prg-wrap"><div class="prg-header"><div class="prg-title">Referral</div><div class="prg-val" style="color:var(--y);" id="prg-ref-v">RM0 / RM4,500</div></div><div class="prg-track"><div class="prg-fill" id="prg-ref" style="width:0%;background:var(--y);"></div></div><div class="prg-note" id="prg-ref-n">还需要 3 单</div></div>
+      <div class="prg-wrap"><div class="prg-header"><div class="prg-title">Trading</div><div class="prg-val" style="color:var(--g);" id="prg-trade-v">RM0 / RM1,500</div></div><div class="prg-track"><div class="prg-fill" id="prg-trade" style="width:0%;background:var(--g);"></div></div></div>
+      <div class="prg-wrap"><div class="prg-header"><div class="prg-title">GS月薪</div><div class="prg-val" style="color:var(--b);" id="prg-gs-v">RM0 / RM1,000</div></div><div class="prg-track"><div class="prg-fill" id="prg-gs" style="width:0%;background:var(--b);"></div></div></div>
+      <div class="prg-wrap"><div class="prg-header"><div class="prg-title">Expenses使用率</div><div class="prg-val" style="color:var(--r);" id="prg-exp-v">RM0 / RM2,500</div></div><div class="prg-track"><div class="prg-fill" id="prg-exp" style="width:0%;background:var(--r);"></div></div><div class="prg-note" id="prg-exp-n">还剩 RM2,500</div></div>
+    </div>
+  </div>
+
+  <!-- INCOME UPDATE -->
+  <div id="income-update" class="sub-pg">
+    <div class="stag">收入</div><div class="stitle">本月收入 Update</div>
+    <div class="card">
+      <div class="clabel">填入本月数字</div>
+      <div class="buffett"><div class="buffett-icon">💡</div><div class="buffett-text">每周五从鲨鱼记账导出，填进来。5分钟。</div></div>
+      <div class="input-row"><div><label>Referral收入</label><span class="sub">这个月几单？</span></div><span class="rm-prefix">RM</span><input type="number" class="num-in" id="inc-ref" placeholder="0" oninput="updateCalc()"></div>
+      <div class="input-row"><div><label>Trading P&L</label><span class="sub">净收益（亏损填负数）</span></div><span class="rm-prefix">RM</span><input type="number" class="num-in" id="inc-trade" placeholder="0" oninput="updateCalc()"></div>
+      <div class="input-row"><div><label>GS月薪</label></div><span class="rm-prefix">RM</span><input type="number" class="num-in" id="inc-gs" placeholder="1000" oninput="updateCalc()"></div>
+      <div class="input-row"><div><label>其他收入</label></div><span class="rm-prefix">RM</span><input type="number" class="num-in" id="inc-other" placeholder="0" oninput="updateCalc()"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--bd);">
+        <div><div style="font-family:var(--mono);font-size:11px;color:var(--mt);">本月总收入</div><div style="font-family:var(--mono);font-size:28px;font-weight:700;color:var(--y);" id="total-income">RM 0</div></div>
+        <button class="btn-y" onclick="saveIncome()">💾 保存</button>
+      </div>
+      <div class="last-update" id="income-updated"></div>
+    </div>
+    <div class="card">
+      <div class="clabel">上传截图</div>
+      <div class="upload-area" onclick="document.getElementById('fi-income').click()"><div style="font-size:20px;margin-bottom:4px;">📎</div><div style="font-size:12px;color:var(--mt);">上传鲨鱼记账截图 / 交易记录</div></div>
+      <input type="file" id="fi-income" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'income-preview')">
+      <div id="income-preview"></div>
+      <div class="nl" style="margin-top:8px;">备注：</div>
+      <textarea class="notes-area" id="income-note" placeholder="这个月收入情况备注..."></textarea>
+    </div>
+    <div class="card"><div class="clabel">历史记录</div><div id="income-history"><div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:8px 0;">还没有历史记录。</div></div></div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="income-expenses" class="sub-pg">
+    <div class="stag">收入</div><div class="stitle">Expenses 支出</div>
+    <div class="card">
+      <div class="clabel">每月预算 — 点黄色数字直接改</div>
+      <div class="buffett"><div class="buffett-icon">⚡</div><div class="buffett-text"><strong>每月上限：RM2,500</strong>（收入RM5K的50%）。超过会亮红点。</div></div>
+      <table class="exp-table">
+        <thead><tr><th>项目</th><th>性质</th><th>预算</th><th>实际</th><th>状态</th></tr></thead>
+        <tbody id="exp-tbody">
+          <tr><td>饮食 / 外卖</td><td><span class="cat cat-need">必要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM600</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,600)" data-limit="600"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>Grab / 油钱</td><td><span class="cat cat-need">必要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM300</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,300)" data-limit="300"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>电话费</td><td><span class="cat cat-need">必要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM80</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,80)" data-limit="80"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>娱乐 / 奶茶</td><td><span class="cat cat-want">想要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM300</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,300)" data-limit="300"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>购物 / 杂物</td><td><span class="cat cat-want">想要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM200</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,200)" data-limit="200"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>订阅</td><td><span class="cat cat-want">想要</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM100</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,100)" data-limit="100"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>Trading入金</td><td><span class="cat cat-inv">投资</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM500</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,500)" data-limit="500"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+          <tr><td>泰国基金（必存）</td><td><span class="cat cat-save">存款</span></td><td style="font-family:var(--mono);font-size:12px;color:var(--mt);">RM1,000</td><td><input class="exp-editable" type="number" placeholder="0" oninput="checkExp(this,1000)" data-limit="1000"></td><td style="text-align:center;"><span class="dot-ok"></span></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);">
+        <div><div style="font-family:var(--mono);font-size:10px;color:var(--mt);">本月总支出</div><div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--r);" id="total-exp">RM 0</div></div>
+        <div style="text-align:right;"><div style="font-family:var(--mono);font-size:10px;color:var(--mt);">预算上限</div><div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--mt);">RM 3,080</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">上传鲨鱼记账截图</div>
+      <div class="upload-area" onclick="document.getElementById('fi-exp').click()"><div style="font-size:20px;margin-bottom:4px;">📱</div><div style="font-size:12px;color:var(--mt);">上传鲨鱼记账月度报告</div></div>
+      <input type="file" id="fi-exp" accept="image/*" style="display:none;" onchange="previewImg(this,'exp-preview')">
+      <div id="exp-preview"></div>
+    </div>
+    <div class="card"><div class="clabel">超支备注</div><textarea class="notes-area" id="exp-notes" placeholder="哪里花多了？为什么？下个月怎么控制？"></textarea></div>
+  </div>
+
+  <!-- REFERRAL -->
+  <div id="income-referral" class="sub-pg">
+    <div class="stag">收入</div><div class="stitle">Referral 追踪</div>
+    <div class="card">
+      <div class="clabel">本月目标：3单 = RM4,500</div>
+      <div class="g3" style="margin-bottom:14px;">
+        <div class="stat hi"><div class="s-label">本月成单</div><div class="s-val" id="ref-closed">0</div><div class="s-sub">目标 3单</div></div>
+        <div class="stat good"><div class="s-label">本月收入</div><div class="s-val" id="ref-income-show">RM0</div></div>
+        <div class="stat"><div class="s-label">在谈中</div><div class="s-val" id="ref-talking" style="color:var(--b);">0</div></div>
+      </div>
+      <div id="ref-list">
+        <!-- 5 referral rows -->
+      </div>
+    </div>
+    <div class="card"><div class="clabel">跟进备注</div><textarea class="notes-area" id="ref-notes" placeholder="谁需要follow up？什么时候联系？"></textarea></div>
+  </div>
+
+  <!-- THAILAND -->
+  <div id="income-thailand" class="sub-pg">
+    <div class="stag">收入</div><div class="stitle">泰国基金 ✈️</div>
+    <div class="thailand-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div><div style="font-size:16px;font-weight:700;">泰国家庭旅行基金</div><div style="font-family:var(--mono);font-size:11px;color:var(--g);margin-top:2px;">目标：2027年6月 ｜ 6人 × RM3,000</div></div>
+        <div style="text-align:right;"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--g);">目标 RM18,000</div></div>
+      </div>
+      <div><div style="font-family:var(--mono);font-size:11px;color:var(--mt);margin-bottom:3px;">目前已存</div><input class="thai-saved-input" type="number" id="thai-saved" placeholder="0" oninput="updateThailand()"></div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--mt);margin-top:3px;" id="thai-goal-text">还需要 RM18,000</div>
+      <div class="thai-bar-track"><div class="thai-bar-fill" id="thai-bar" style="width:0%"></div></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;">
+        <span><strong id="thai-pct" style="color:var(--g);">0%</strong> 完成</span>
+        <span><strong id="thai-months" style="color:var(--g);">13</strong> 个月剩余</span>
+        <span><strong style="color:var(--g);">RM1,000</strong>/月存款</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel">每月存款记录</div>
+      <div class="input-row"><label>May 2025</label><span class="rm-prefix">RM</span><input type="number" class="num-in" id="thai-may" placeholder="0" oninput="updateThailand()"></div>
+      <div class="input-row"><label>Jun 2025</label><span class="rm-prefix">RM</span><input type="number" class="num-in" id="thai-jun" placeholder="0" oninput="updateThailand()"></div>
+      <div class="input-row"><label>Jul 2025</label><span class="rm-prefix">RM</span><input type="number" class="num-in" id="thai-jul" placeholder="0" oninput="updateThailand()"></div>
+      <button class="btn-y" style="margin-top:8px;" onclick="showFlash('已保存 ✓')">💾 保存</button>
+    </div>
+    <div class="card"><div class="clabel">泰国行程想法</div><textarea class="notes-area" id="thai-notes" placeholder="想去哪里？几天？家人和女友的喜好？"></textarea></div>
+  </div>
+
+  <!-- ALLOCATION -->
+  <div id="income-allocation" class="sub-pg">
+    <div class="stag">收入</div><div class="stitle">资金分配</div>
+    <div class="card">
+      <div class="clabel">每月分配（基于收入RM5,000）</div>
+      <div class="buffett"><div class="buffett-icon">🧠</div><div class="buffett-text"><strong>先决定每块钱去哪里，才开始花钱。</strong>不是"看还剩多少"才存。</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">✈️ 泰国基金</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--g);width:35px;">20%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:20%;background:var(--g);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--g);width:70px;text-align:right;">RM1,000</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">📈 Trading投资</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--y);width:35px;">10%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:10%;background:var(--y);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--y);width:70px;text-align:right;">RM500</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">🍚 必要支出</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--b);width:35px;">20%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:20%;background:var(--b);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--b);width:70px;text-align:right;">RM1,000</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">🎮 生活娱乐</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--o);width:35px;">12%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:12%;background:var(--o);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--o);width:70px;text-align:right;">RM600</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">🆘 紧急备用金</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--r);width:35px;">12%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:12%;background:var(--r);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--r);width:70px;text-align:right;">RM600</div></div>
+      <div class="alloc-row"><div style="font-size:13px;flex:1;">💰 手头现金流</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--dim);width:35px;">26%</div><div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:26%;background:var(--dim);"></div></div><div style="font-family:var(--mono);font-size:12px;color:var(--dim);width:70px;text-align:right;">RM1,300</div></div>
+      <div style="padding-top:12px;border-top:1px solid var(--bd);margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--mt);">总计：RM5,000 ｜ 存款率：<span style="color:var(--g);font-weight:700;">32%</span></div>
+    </div>
+  </div>
+
+</div><!-- end sec-income -->
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║       VIRAL TRACKER          ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-viral" class="section">
+  <div class="stag">Viral追踪</div>
+  <div class="stitle">IG Viral 监测系统</div>
+  <div class="hb"><div class="hbl">你想build的东西</div><div class="hbt">每4小时扫描IG — 追踪<strong>金融类内容</strong> + <strong>全马来西亚流行内容</strong> — 超过threshold就标记爆款</div></div>
+  <div class="card">
+    <div class="clabel">📊 Viral Threshold — Research Based 2025–2026</div>
+    <div style="margin-bottom:8px;"><span class="viral-badge"><span class="viral-dot"></span>VIRAL ZONE</span></div>
+    <div class="threshold-grid">
+      <div class="th-item"><div class="th-num">50K+</div><div class="th-label">Views（开始爆）</div></div>
+      <div class="th-item hot"><div class="th-num">200K+</div><div class="th-label">Views（真的爆）</div></div>
+      <div class="th-item"><div class="th-num">5K+</div><div class="th-label">DM Shares</div></div>
+      <div class="th-item hot"><div class="th-num">10K+</div><div class="th-label">Saves（爆款信号）</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--mt);line-height:1.7;"><strong style="color:var(--t);">马来西亚local scale：</strong>20K–50K在短时间内已经算爆。<br><strong style="color:var(--t);">最强信号：</strong>DM分享率 — 有人发给朋友 = 算法会大推。<br><strong style="color:var(--t);">时间窗口：</strong>发布后1–2小时内的engagement决定后续推量。</div>
+  </div>
+  <div class="card">
+    <div class="clabel">🎯 建议Tracker设定</div>
+    <div class="task"><div class="tdot" style="background:var(--g)"></div><div class="tx"><strong>🟡 开始起飞</strong> — Views 20K+ 在4小时内 OR Shares 1K+</div></div>
+    <div class="task"><div class="tdot" style="background:var(--y)"></div><div class="tx"><strong>🟠 有爆相</strong> — Views 50K+ OR Saves 3K+ OR Shares 3K+</div></div>
+    <div class="task"><div class="tdot" style="background:var(--r)"></div><div class="tx"><strong>🔴 爆了</strong> — Views 100K–200K+ 在24小时内</div></div>
+  </div>
+  <div class="card">
+    <div class="clabel">🛠️ 下一步</div>
+    <div class="hb"><div class="hbl">等你确认</div><div class="hbt">你告诉我想追踪哪些IG账号，我帮你build这个网站。需要Meta Developer账号或第三方工具（Apify）。</div></div>
+    <div class="nl">想追踪的账号 / 想法记录：</div>
+    <textarea class="notes-area" id="viral-notes" placeholder="想追踪的账号：@xxx, @xxx&#10;想要的功能：...&#10;要不要追踪TikTok也一起？"></textarea>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗ -->
+<!-- ║           NOTES              ║ -->
+<!-- ╚══════════════════════════════╝ -->
+<div id="sec-notes" class="section">
+  <div class="stag">快速笔记</div>
+  <div class="stitle">随时写这里</div>
+  <div class="card"><div class="clabel">⚡ 今天急事</div><textarea class="notes-area" id="n-urgent" placeholder="今天突然出现什么急事？什么不做会出问题？" style="min-height:80px;"></textarea>
+    <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-n1').click()"><div style="font-size:16px;margin-bottom:3px;">📎</div><div style="font-size:11px;color:var(--mt);">上传截图</div></div>
+    <input type="file" id="fi-n1" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'n1-preview')"><div id="n1-preview"></div>
+  </div>
+  <div class="card"><div class="clabel">💡 新想法 / 灵感</div><textarea class="notes-area" id="n-ideas" placeholder="video idea？business idea？随时写，不要让它消失。" style="min-height:80px;"></textarea>
+    <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-n2').click()"><div style="font-size:16px;margin-bottom:3px;">📎</div><div style="font-size:11px;color:var(--mt);">上传截图</div></div>
+    <input type="file" id="fi-n2" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'n2-preview')"><div id="n2-preview"></div>
+  </div>
+  <div class="card"><div class="clabel">📋 本周跟进</div><textarea class="notes-area" id="n-followup" placeholder="有什么事情这周必须跟进？&#10;例：跟Jason确认拍摄时间、联系活动场地..." style="min-height:90px;"></textarea></div>
+  <div class="card"><div class="clabel">🧠 明天第一件事</div><textarea class="notes-area" id="n-tomorrow" placeholder="明天起床，第一件事是什么？现在决定好。" style="min-height:60px;"></textarea></div>
+  <div class="card">
+    <div class="clabel">📊 本周数据记录</div>
+    <div class="nl">JS/GS 本周最好表现：</div>
+    <textarea class="notes-area" id="n-gs-data" placeholder="哪条post/video表现最好？Views多少？为什么爆？" style="min-height:60px;margin-bottom:10px;"></textarea>
+    <div class="nl">个人IG本周增长：</div>
+    <textarea class="notes-area" id="n-sw-data" placeholder="涨了多少粉？哪条内容带来的？" style="min-height:60px;margin-bottom:10px;"></textarea>
+    <div class="nl">本月收入进度：</div>
+    <textarea class="notes-area" id="n-income-data" placeholder="Referral：几单？RM多少？&#10;Trading：+/- 多少？&#10;总计：RM ?" style="min-height:70px;"></textarea>
+    <div class="upload-area" style="margin-top:10px;" onclick="document.getElementById('fi-n3').click()"><div style="font-size:16px;margin-bottom:3px;">📊</div><div style="font-size:11px;color:var(--mt);">上传数据截图</div></div>
+    <input type="file" id="fi-n3" accept="image/*,.pdf" style="display:none;" onchange="previewImg(this,'n3-preview')"><div id="n3-preview"></div>
+  </div>
+</div>
+
+</div><!-- end main -->
+<div class="footer">WAI.SYS v3.0 — Master OS ｜ 有更新随时告诉我</div>
+<div class="flash" id="flash-msg">已保存 ✓</div>
+
+<!-- AUDIO PLAYER BAR -->
+<div class="audio-bar" id="audio-bar">
+  <button class="audio-btn" id="audio-play-btn" onclick="toggleBGM()">▶</button>
+  <button class="audio-btn" onclick="nextTrack()" style="font-size:11px;">⏭</button>
+  <div class="audio-track" id="audio-track-name"><span>Lo-fi Study</span> — WAI BGM</div>
+  <div class="audio-wave paused" id="audio-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+  <input type="range" class="audio-vol" id="audio-vol" min="0" max="1" step="0.05" value="0.3" oninput="setVolume(this.value)">
+</div>
+<!-- NOTIFICATION TOAST -->
+<div class="notif-toast" id="notif-toast">
+  <div class="notif-title" id="notif-title">📅 提醒</div>
+  <div class="notif-body" id="notif-body"></div>
+  <div class="notif-time" id="notif-time"></div>
+</div>
+
+<script>
+// ═══════════ NAVIGATION ═══════════
+const subNavSections = ['personal','income'];
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('sec-' + id).classList.add('on');
+  btn.classList.add('on');
+  // Show/hide sub navs
+  document.querySelectorAll('.sub-nav').forEach(n => n.classList.remove('visible'));
+  if (subNavSections.includes(id)) {
+    document.getElementById('subnav-' + id).classList.add('visible');
+  }
+  window.scrollTo(0, 0);
+  // Init section-specific stuff
+  if (id === 'schedule') initSchedule();
+  if (id === 'personal') initPersonalToday();
+}
+
+function showSub(section, sub, btn) {
+  document.querySelectorAll('#sec-' + section + ' .sub-pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('#subnav-' + section + ' .sb').forEach(b => b.classList.remove('on'));
+  document.getElementById(section + '-' + sub).classList.add('on');
+  btn.classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════ FLASH ═══════════
+function showFlash(msg) {
+  const f = document.getElementById('flash-msg');
+  f.textContent = msg; f.classList.add('show');
+  setTimeout(() => f.classList.remove('show'), 2500);
+}
+
+// ═══════════ CALENDAR DATA ═══════════
+const DAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const classSchedule = {
+  1: [{time:'08:00–09:00',name:'ENT 3074 Workshop',loc:'Online'},{time:'16:00–18:00',name:'MGT 3054 Lecture',loc:'Online'}],
+  2: [{time:'09:00–10:00',name:'FIN 3034 Tutorial',loc:'Q-3-1'},{time:'10:00–11:00',name:'FIN3154 Tutorial',loc:'Q-6-5'},{time:'11:00–12:00',name:'FIN3154 Workshop',loc:'Online'},{time:'12:00–14:00',name:'ENT 3074 Lecture',loc:'LT1'},{time:'14:00–15:00',name:'MGT 3054 Tutorial',loc:'Q-3-10'}],
+  3: [{time:'12:00–14:00',name:'FIN3154 Lecture',loc:'JC 1'}],
+  4: [{time:'12:00–14:00',name:'FIN 3034 Lecture',loc:'Online'}],
+  5: [{time:'08:00–09:00',name:'FIN 3034 Workshop',loc:'Q-LT360'},{time:'10:00–11:00',name:'ENT 3074 Tutorial',loc:'Q-6-1'},{time:'14:30–15:30',name:'MGT 3054 Workshop',loc:'Online'}],
+};
+const swContent = {
+  0:{type:'PERSONAL STORY',color:'var(--p)',bg:'rgba(199,125,255,.1)',desc:'每2周一次高质内容。拍真实经历，RM900故事或第一次投资。',effort:'30–45分钟'},
+  1:{type:'CAPTION TRAP',color:'var(--r)',bg:'rgba(255,107,107,.1)',desc:'4pm课前发。"小钱×时间"Caption Trap。视频5秒，Caption详细写。',effort:'15分钟'},
+  2:{type:'CAPTION TRAP',color:'var(--r)',bg:'rgba(255,107,107,.1)',desc:'最忙的一天。提前准备好，7am直接发，今天只需要5分钟。',effort:'5分钟（提前准备）'},
+  3:{type:'LEFT RIGHT',color:'var(--g)',bg:'rgba(107,203,119,.1)',desc:'课后下午做。左右对比数字视频，用真实马来西亚产品。',effort:'20分钟'},
+  4:{type:'SHARING INFO',color:'var(--b)',bg:'rgba(77,150,255,.1)',desc:'每周一次高质内容。TradingView截图+指标解释，建立权威感。',effort:'25分钟'},
+  5:{type:'CAPTION TRAP',color:'var(--r)',bg:'rgba(255,107,107,.1)',desc:'课间空档发。发完顺便记录本周数据表现。',effort:'15分钟'},
+  6:{type:'MARKET TREND',color:'var(--y)',bg:'rgba(255,217,61,.1)',desc:'蹭本周最热市场新闻。没热点改Caption Trap。热点24–48小时内必发。',effort:'10–20分钟'},
+};
+
+function getTodayDay() { return new Date().getDay(); }
+
+function initPersonalToday() {
+  const day = getTodayDay();
+  const classes = classSchedule[day] || [];
+  const ct = swContent[day];
+  // Banner
+  const label = document.getElementById('sw-banner-label');
+  const text = document.getElementById('sw-banner-text');
+  if (day === 2) {
+    label.textContent = '⚠️ 今天超级忙（5节课）';
+    label.style.color = 'var(--r)';
+    text.innerHTML = '<strong style="color:var(--r);">今天不要做新内容。</strong>昨天准备好的帖子，早上7am直接发，完成。';
+  } else if (!classes.length) {
+    label.textContent = '今天无课 — 最佳内容日 ✓';
+    text.textContent = '今天没有课，有充足时间。做高质量内容（Personal Story 或 Sharing Info）。';
+  } else {
+    label.textContent = '今天课表';
+    text.innerHTML = classes.map(c => `<strong>${c.time}</strong> ${c.name} <span style="color:var(--dim);">${c.loc}</span>`).join('<br>');
+  }
+  // Task box
+  document.getElementById('sw-today-task').innerHTML = `
+    <div style="background:var(--s2);border-radius:8px;padding:13px;border:1px solid var(--bd);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="background:${ct.bg};color:${ct.color};font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;font-weight:700;">${ct.type}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--mt);">预计 ${ct.effort}</div>
+      </div>
+      <div style="font-size:13px;color:#ccc;line-height:1.5;">${ct.desc}</div>
+    </div>`;
+}
+
+function initSchedule() {
+  const day = getTodayDay();
+  const now = new Date();
+  document.getElementById('sched-today-label').textContent = '— ' + DAYS[day] + ' ' + MONTHS[now.getMonth()] + now.getDate() + '日';
+  const classes = classSchedule[day] || [];
+  const ct = swContent[day];
+  // Class text
+  const ct2 = document.getElementById('sched-class-text');
+  if (!classes.length) {
+    ct2.innerHTML = '<strong>今天无课 ✓</strong> — 有充足时间，做高质量内容。';
+  } else {
+    ct2.innerHTML = classes.map(c => `<strong>${c.time}</strong> ${c.name} <span style="color:var(--dim);">${c.loc}</span>`).join('<br>');
+  }
+  // Build timeline
+  const blocks = [
+    {time:'07:00',title:'起床 + 早餐 + 看市场',desc:'15分钟看昨晚市场（加密/宏观/马来西亚）',dot:'rest'},
+    {time:'07:30',title:'GS / JS 内容准备',desc:'今天carousel方向、安排interns任务',dot:'gs'},
+  ];
+  if (day === 2) blocks.push({time:'07:00',title:'📱 发今天IG Post',desc:'提前准备好，直接发。今天只需要这5分钟。',dot:'sw'});
+  classes.forEach(c => blocks.push({time:c.time,title:c.name,desc:c.loc,dot:'class'}));
+  if (day !== 2) {
+    const swT = {0:'15:00',1:'14:00',3:'15:30',4:'15:00',5:'11:30',6:'10:00'}[day]||'15:00';
+    blocks.push({time:swT,title:`📱 个人品牌 — ${ct.type}`,desc:ct.desc,dot:'sw'});
+  }
+  blocks.push({time:'20:00',title:'Referral 或 Trading复盘',desc:'二选一',dot:'money'});
+  blocks.push({time:'22:00',title:'收工总结',desc:'3件事完成了多少？明天第一件事？',dot:'rest'});
+  blocks.push({time:'00:00',title:'睡觉',desc:'固定12点睡',dot:'rest'});
+  const dotColors = {rest:var2('--dim'),gs:var2('--b'),js:var2('--p'),sw:var2('--g'),money:var2('--y'),class:var2('--b')};
+  const tl = document.getElementById('sched-timeline');
+  tl.innerHTML = blocks.map(b => `
+    <div class="sched-row">
+      <div class="sched-time">${b.time}</div>
+      <div class="sched-line"><div class="sched-dot ${b.dot}"></div><div class="sched-bar"></div></div>
+      <div class="sched-content"><div class="sc-title">${b.title}</div><div class="sc-desc">${b.desc}</div></div>
+    </div>`).join('');
+}
+
+function var2(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+// ═══════════ CHECK ═══════════
+function toggleCheck(el) { el.classList.toggle('done'); }
+
+// ═══════════ CONTENT TYPE EXPAND ═══════════
+function toggleCT(card) {
+  const d = card.querySelector('.ct-detail');
+  const open = d.style.display === 'block';
+  document.querySelectorAll('.ct-detail').forEach(x => x.style.display = 'none');
+  document.querySelectorAll('.ct-card').forEach(x => x.classList.remove('selected'));
+  if (!open) { d.style.display = 'block'; card.classList.add('selected'); }
+}
+
+// ═══════════ URGENT EVENTS ═══════════
+let urgentItems = [];
+const todayKey = new Date().toDateString();
+const lastDay = localStorage.getItem('wai_urg_day');
+if (lastDay !== todayKey) {
+  localStorage.setItem('wai_urgent', '[]');
+  localStorage.setItem('wai_urg_day', todayKey);
+}
+urgentItems = JSON.parse(localStorage.getItem('wai_urgent') || '[]');
+
+function renderUrgent() {
+  const list = document.getElementById('urgent-list');
+  const empty = document.getElementById('urgent-empty');
+  const impact = document.getElementById('urgent-impact');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!urgentItems.length) { empty.style.display='block'; impact.style.display='none'; return; }
+  empty.style.display = 'none'; impact.style.display = 'block';
+  urgentItems.forEach((item, i) => {
+    const pColors = {high:'background:rgba(255,107,107,.15);color:var(--r);border-color:rgba(255,107,107,.3);',mid:'background:rgba(255,165,82,.15);color:var(--o);border-color:rgba(255,165,82,.3);',low:'background:rgba(107,203,119,.15);color:var(--g);border-color:rgba(107,203,119,.3);'};
+    const pLabels = {high:'🔴 紧急',mid:'🟡 重要',low:'🟢 可延'};
+    const row = document.createElement('div'); row.className = 'urgent-row';
+    row.innerHTML = `<input class="urg-time" type="text" placeholder="几点?" value="${item.time||''}" oninput="updateUrg(${i},'time',this.value)"><textarea class="urg-text" oninput="updateUrg(${i},'text',this.value)">${item.text||''}</textarea><button class="urg-priority" style="${pColors[item.priority||'high']}" onclick="cycleUrg(${i})">${pLabels[item.priority||'high']}</button><button class="urg-del" onclick="delUrg(${i})">×</button>`;
+    list.appendChild(row);
+  });
+  analyzeUrgent();
+  localStorage.setItem('wai_urgent', JSON.stringify(urgentItems));
+}
+
+function addUrgentRow() {
+  const now = new Date();
+  urgentItems.push({time:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'),text:'',priority:'high'});
+  renderUrgent();
+  setTimeout(() => { const rows = document.querySelectorAll('.urg-text'); if(rows.length) rows[rows.length-1].focus(); }, 50);
+}
+function delUrg(i) { urgentItems.splice(i,1); renderUrgent(); }
+function updateUrg(i,k,v) { urgentItems[i][k]=v; localStorage.setItem('wai_urgent',JSON.stringify(urgentItems)); if(k==='time') analyzeUrgent(); }
+function cycleUrg(i) { const o=['high','mid','low']; urgentItems[i].priority=o[(o.indexOf(urgentItems[i].priority||'high')+1)%3]; renderUrgent(); }
+function analyzeUrgent() {
+  const adv = document.getElementById('urgent-impact');
+  if (!adv) return;
+  const highs = urgentItems.filter(u=>u.priority==='high');
+  let msg = '';
+  if (highs.length) {
+    const times = highs.map(u=>u.time).filter(Boolean);
+    msg += `<strong style="color:var(--r);">有 ${highs.length} 件紧急事件</strong>${times.length?' ('+times.join('、')+'待处理)':''}<br>`;
+    const affectsSW = highs.some(u=>{ const h=parseInt((u.time||'0').split(':')[0]); return h>=15&&h<=18; });
+    msg += affectsSW ? '⚠️ <strong style="color:var(--o);">影响下午内容时段</strong> — 建议把IG post提前到早上或中午做好再发。' : '✓ 不影响内容发帖时段，按计划执行。';
+  } else {
+    msg = '今天只有低优先级事项，内容计划正常执行。';
+  }
+  adv.innerHTML = msg;
+}
+
+// ═══════════ INCOME CALC ═══════════
+function updateCalc() {
+  const ref = parseFloat(document.getElementById('inc-ref')?.value)||0;
+  const trade = parseFloat(document.getElementById('inc-trade')?.value)||0;
+  const gs = parseFloat(document.getElementById('inc-gs')?.value)||1000;
+  const other = parseFloat(document.getElementById('inc-other')?.value)||0;
+  const total = ref+trade+gs+other;
+  const ti = document.getElementById('total-income'); if(ti) ti.textContent='RM '+total.toLocaleString();
+  const oi = document.getElementById('ov-income'); if(oi) oi.textContent='RM'+total.toLocaleString();
+  setPrg('prg-ref',ref,4500,'prg-ref-v','RM'+ref.toLocaleString()+' / RM4,500');
+  setPrg('prg-trade',trade,1500,'prg-trade-v','RM'+trade.toLocaleString()+' / RM1,500');
+  setPrg('prg-gs',gs,1000,'prg-gs-v','RM'+gs.toLocaleString()+' / RM1,000');
+  const pn = document.getElementById('prg-ref-n'); if(pn) pn.textContent='已成 '+Math.floor(ref/1500)+' 单 / 还需要 '+(3-Math.floor(ref/1500))+' 单';
+  const exp = getTotalExp();
+  const on = document.getElementById('ov-net'); if(on) on.textContent='RM'+(total-exp).toLocaleString();
+}
+
+function setPrg(barId,val,max,labelId,labelText) {
+  const b = document.getElementById(barId); if(b) b.style.width=Math.min(100,Math.round((val/max)*100))+'%';
+  const l = document.getElementById(labelId); if(l) l.textContent=labelText;
+}
+
+function saveIncome() {
+  const ref=parseFloat(document.getElementById('inc-ref')?.value)||0;
+  const trade=parseFloat(document.getElementById('inc-trade')?.value)||0;
+  const gs=parseFloat(document.getElementById('inc-gs')?.value)||1000;
+  const other=parseFloat(document.getElementById('inc-other')?.value)||0;
+  const total=ref+trade+gs+other;
+  const data={ref,trade,gs,other,total,date:new Date().toISOString()};
+  localStorage.setItem('wai_income_cur',JSON.stringify(data));
+  const now=new Date();
+  const mk=now.getFullYear()+'-'+(now.getMonth()+1);
+  let hist=JSON.parse(localStorage.getItem('wai_income_hist')||'{}');
+  hist[mk]=data; localStorage.setItem('wai_income_hist',JSON.stringify(hist));
+  renderHistory(hist);
+  const iu=document.getElementById('income-updated'); if(iu) iu.textContent='最后更新：'+now.toLocaleString('zh');
+  showFlash('收入已保存 ✓');
+}
+
+function renderHistory(hist) {
+  const el=document.getElementById('income-history'); if(!el) return;
+  const keys=Object.keys(hist).sort().reverse();
+  if(!keys.length){el.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:8px 0;">还没有历史记录。</div>';return;}
+  const max=Math.max(...keys.map(k=>hist[k].total));
+  el.innerHTML=keys.map(k=>{
+    const d=hist[k];const w=max>0?Math.round((d.total/max)*100):0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);"><div style="font-family:var(--mono);font-size:11px;color:var(--mt);width:60px;">${k}</div><div style="flex:1;height:4px;background:var(--s3);border-radius:2px;"><div style="height:100%;width:${w}%;background:var(--y);border-radius:2px;"></div></div><div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--y);">RM${d.total.toLocaleString()}</div></div>`;
+  }).join('');
+}
+
+// ═══════════ EXPENSES ═══════════
+function getTotalExp() {
+  let t=0; document.querySelectorAll('.exp-editable').forEach(el=>t+=parseFloat(el.value)||0); return t;
+}
+
+function checkExp(el,limit) {
+  const val=parseFloat(el.value)||0;
+  const row=el.closest('tr'); if(!row) return;
+  const sc=row.querySelector('td:last-child'); if(sc) sc.innerHTML=val>limit?'<span class="dot-warn"></span>':'<span class="dot-ok"></span>';
+  const total=getTotalExp();
+  const te=document.getElementById('total-exp'); if(te) te.textContent='RM '+total.toLocaleString();
+  const oe=document.getElementById('ov-exp'); if(oe) oe.textContent='RM'+total.toLocaleString();
+  setPrg('prg-exp',total,2500,'prg-exp-v','RM'+total.toLocaleString()+' / RM2,500');
+  const pn=document.getElementById('prg-exp-n'); if(pn) pn.textContent='还剩 RM'+(2500-total).toLocaleString();
+  const inc=parseFloat((document.getElementById('total-income')?.textContent||'0').replace('RM ','').replace(/,/g,''))||0;
+  const on=document.getElementById('ov-net'); if(on) on.textContent='RM'+(inc-total).toLocaleString();
+  // Save
+  const vals=[]; document.querySelectorAll('.exp-editable').forEach(e=>vals.push(e.value));
+  localStorage.setItem('wai_expenses',JSON.stringify(vals));
+}
+
+// ═══════════ REFERRAL ═══════════
+function buildRefList() {
+  const list=document.getElementById('ref-list'); if(!list) return;
+  list.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const div=document.createElement('div'); div.className='ref-item';
+    div.innerHTML=`<div class="ref-num" id="rn-${i}">${i}</div><div style="flex:1;"><input class="ref-name-input" id="rname-${i}" placeholder="Lead名字 / 备注" oninput="saveRef()"><select class="ref-status-sel" id="rstatus-${i}" onchange="updateRefStats();saveRef()"><option value="new">🔵 新contact</option><option value="talking">🟡 在谈中</option><option value="closed">🟢 成单</option><option value="dead">⚫ 已死</option></select></div><div class="ref-rm empty" id="rrm-${i}">RM—</div>`;
+    list.appendChild(div);
+  }
+  loadRef();
+}
+
+function updateRefStats() {
+  let closed=0,talking=0;
+  for(let i=1;i<=5;i++){
+    const st=document.getElementById('rstatus-'+i)?.value;
+    const rm=document.getElementById('rrm-'+i);
+    const rn=document.getElementById('rn-'+i);
+    if(st==='closed'){closed++;if(rm){rm.textContent='RM1,500';rm.classList.remove('empty');}if(rn)rn.classList.add('active');}
+    else{if(rm){rm.textContent='RM—';rm.classList.add('empty');}if(rn)rn.classList.remove('active');}
+    if(st==='talking') talking++;
+  }
+  const rc=document.getElementById('ref-closed'); if(rc) rc.textContent=closed;
+  const ri=document.getElementById('ref-income-show'); if(ri) ri.textContent='RM'+(closed*1500).toLocaleString();
+  const rt=document.getElementById('ref-talking'); if(rt) rt.textContent=talking;
+  if(document.getElementById('inc-ref')){document.getElementById('inc-ref').value=closed*1500;updateCalc();}
+}
+
+function saveRef() {
+  const data=[];
+  for(let i=1;i<=5;i++) data.push({name:document.getElementById('rname-'+i)?.value||'',status:document.getElementById('rstatus-'+i)?.value||'new'});
+  localStorage.setItem('wai_referral',JSON.stringify(data));
+}
+
+function loadRef() {
+  const data=JSON.parse(localStorage.getItem('wai_referral')||'[]');
+  data.forEach((d,i)=>{
+    const idx=i+1;
+    const rn=document.getElementById('rname-'+idx); if(rn) rn.value=d.name||'';
+    const rs=document.getElementById('rstatus-'+idx); if(rs) rs.value=d.status||'new';
+  });
+  updateRefStats();
+}
+
+// ═══════════ THAILAND ═══════════
+function updateThailand() {
+  const saved=parseFloat(document.getElementById('thai-saved')?.value)||0;
+  const goal=18000; const pct=Math.min(100,Math.round((saved/goal)*100));
+  const b=document.getElementById('thai-bar'); if(b) b.style.width=pct+'%';
+  const p=document.getElementById('thai-pct'); if(p) p.textContent=pct+'%';
+  const g=document.getElementById('thai-goal-text'); if(g) g.textContent='还需要 RM'+(goal-saved).toLocaleString();
+  const ot=document.getElementById('ov-thai'); if(ot) ot.textContent='RM'+saved.toLocaleString();
+  const now=new Date();const target=new Date(2027,5,1);
+  const months=Math.max(0,Math.round((target-now)/(1000*60*60*24*30)));
+  const tm=document.getElementById('thai-months'); if(tm) tm.textContent=months;
+  localStorage.setItem('wai_thai_saved',saved);
+}
+
+// ═══════════ FOLLOWERS ═══════════
+function updateFollowers() {
+  const cur=parseInt(document.getElementById('fol-current')?.value)||600;
+  const goal=1500; const pct=Math.min(100,Math.round((cur/goal)*100));
+  const need=Math.max(0,goal-cur); const weeks=Math.ceil(need/50);
+  const fb=document.getElementById('fol-bar'); if(fb) fb.style.width=pct+'%';
+  const fn=document.getElementById('fol-need'); if(fn) fn.textContent=need.toLocaleString();
+  const fp=document.getElementById('fol-pct'); if(fp) fp.textContent=pct+'%';
+  const fw=document.getElementById('fol-weeks'); if(fw) fw.textContent=weeks;
+  const m800b=document.getElementById('ms-800-b'); if(m800b) m800b.style.width=Math.max(0,Math.min(100,Math.round(((cur-600)/200)*100)))+'%';
+  const m1kb=document.getElementById('ms-1k-b'); if(m1kb) m1kb.style.width=Math.max(0,Math.min(100,Math.round(((cur-600)/400)*100)))+'%';
+  const m15b=document.getElementById('ms-15-b'); if(m15b) m15b.style.width=Math.max(0,Math.min(100,Math.round(((cur-600)/900)*100)))+'%';
+  if(cur>=800){const s=document.getElementById('ms-800-s');if(s){s.textContent='✓ 达成';s.style.color='var(--g)';}}
+  if(cur>=1000){const s=document.getElementById('ms-1k-s');if(s){s.textContent='✓ 达成';s.style.color='var(--g)';}}
+  localStorage.setItem('wai_sw_followers',cur);
+}
+
+// ═══════════ IMAGE PREVIEW ═══════════
+function previewImg(input, cid) {
+  const file=input.files[0]; if(!file) return;
+  const el=document.getElementById(cid); if(!el) return;
+  if(file.type==='application/pdf'){el.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--g);padding:8px 0;">✓ PDF：'+file.name+'</div>';return;}
+  const r=new FileReader();
+  r.onload=e=>{el.innerHTML='<img src="'+e.target.result+'" style="max-width:100%;border-radius:8px;margin-top:8px;border:1px solid var(--bd);">';};
+  r.readAsDataURL(file);
+}
+
+// ═══════════ WEEKLY SAVE ═══════════
+function saveWeekly() {
+  ['w-followers','w-topviews','w-posts','w-best'].forEach(id=>{
+    const el=document.getElementById(id);if(el) localStorage.setItem('wai_w_'+id,el.value||'');
+  });
+  showFlash('本周记录已保存 ✓');
+}
+
+// ═══════════ NOTES AUTO-SAVE ═══════════
+const noteIds=['gs-notes','ev-venue','ev-content','ev-todo','today-note','my-ideas','post-note','income-note','exp-notes','ref-notes','thai-notes','viral-notes','n-urgent','n-ideas','n-followup','n-tomorrow','n-gs-data','n-sw-data','n-income-data'];
+
+// ═══════════ LOAD ALL ═══════════
+function loadAll() {
+  // Notes
+  noteIds.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const v=localStorage.getItem('wai_n_'+id);
+    if(v) el.value=v;
+    el.addEventListener('input',()=>localStorage.setItem('wai_n_'+id,el.value));
+  });
+  // Weekly
+  ['w-followers','w-topviews','w-posts','w-best'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const v=localStorage.getItem('wai_w_'+id); if(v) el.value=v;
+  });
+  // Income
+  const inc=JSON.parse(localStorage.getItem('wai_income_cur')||'null');
+  if(inc){
+    const ri=document.getElementById('inc-ref'); if(ri) ri.value=inc.ref||0;
+    const rt=document.getElementById('inc-trade'); if(rt) rt.value=inc.trade||0;
+    const rg=document.getElementById('inc-gs'); if(rg) rg.value=inc.gs||1000;
+    const ro=document.getElementById('inc-other'); if(ro) ro.value=inc.other||0;
+    updateCalc();
+    if(inc.date){const iu=document.getElementById('income-updated');if(iu)iu.textContent='最后更新：'+new Date(inc.date).toLocaleString('zh');}
+  }
+  renderHistory(JSON.parse(localStorage.getItem('wai_income_hist')||'{}'));
+  // Expenses
+  const expVals=JSON.parse(localStorage.getItem('wai_expenses')||'[]');
+  document.querySelectorAll('.exp-editable').forEach((el,i)=>{if(expVals[i])el.value=expVals[i];});
+  // Thailand
+  const ts=localStorage.getItem('wai_thai_saved');
+  if(ts){const tsi=document.getElementById('thai-saved');if(tsi){tsi.value=ts;updateThailand();}}
+  // Followers
+  const fol=localStorage.getItem('wai_sw_followers');
+  if(fol){const fi=document.getElementById('fol-current');if(fi){fi.value=fol;updateFollowers();}}
+  // Referral
+  buildRefList();
+  // Urgent
+  renderUrgent();
+  // Init today sections
+  initPersonalToday();
+  initSchedule();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAll();
+  initCalendarAndNotifs();
+});
+</script>
+<script>
+
+// ═══════════ AUDIO SYSTEM ═══════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null, bgmPlaying = false, bgmGain = null, bgmSource = null;
+let currentTrackIdx = 0, notifTimers = [];
+const TRACKS = [{name:'Lo-fi Study',bpm:75},{name:'Chill Focus',bpm:85},{name:'Deep Work',bpm:65}];
+
+function initAudio(){
+  if(audioCtx) return;
+  audioCtx = new AudioCtx();
+  bgmGain = audioCtx.createGain();
+  bgmGain.gain.value = 0.3;
+  bgmGain.connect(audioCtx.destination);
+}
+
+function makeLofiBeat(ctx, gain, bpm){
+  const bl = 60/bpm, bars = 8, dur = bl*4*bars;
+  function note(freq,start,len,vol=0.08){
+    const osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.connect(g);g.connect(gain);osc.frequency.value=freq;osc.type='sine';
+    g.gain.setValueAtTime(0,ctx.currentTime+start);
+    g.gain.linearRampToValueAtTime(vol,ctx.currentTime+start+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+start+len);
+    osc.start(ctx.currentTime+start);osc.stop(ctx.currentTime+start+len+0.05);
+  }
+  const chords=[[349,440,523,659],[220,261,329,392],[294,349,440,523],[261,329,392,523]];
+  for(let bar=0;bar<bars;bar++){
+    const chord=chords[bar%4],t=bar*bl*4;
+    chord.forEach((freq,i)=>note(freq,t+i*0.02,bl*3.5,0.05));
+    for(let b=0;b<8;b++){
+      const ht=t+b*bl*0.5,buf=ctx.createBuffer(1,ctx.sampleRate*0.05,ctx.sampleRate);
+      const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.12;
+      const src=ctx.createBufferSource(),hg=ctx.createGain();
+      src.buffer=buf;src.connect(hg);hg.connect(gain);
+      hg.gain.setValueAtTime(b%2===0?0.25:0.12,ctx.currentTime+ht);
+      hg.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+ht+0.05);
+      src.start(ctx.currentTime+ht);
+    }
+    [0,bl*1.5,bl*2.5].forEach(off=>{
+      const ks=ctx.createOscillator(),kg=ctx.createGain();
+      ks.connect(kg);kg.connect(gain);
+      ks.frequency.setValueAtTime(120,ctx.currentTime+t+off);
+      ks.frequency.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+off+0.15);
+      kg.gain.setValueAtTime(0.35,ctx.currentTime+t+off);
+      kg.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+off+0.15);
+      ks.start(ctx.currentTime+t+off);ks.stop(ctx.currentTime+t+off+0.2);
+    });
+  }
+  return dur;
+}
+
+function playBGM(){
+  if(!audioCtx) initAudio();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const track=TRACKS[currentTrackIdx];
+  const dur=makeLofiBeat(audioCtx,bgmGain,track.bpm);
+  bgmPlaying=true;
+  const pb=document.getElementById('audio-play-btn');if(pb)pb.textContent='⏸';
+  const aw=document.getElementById('audio-wave');if(aw)aw.classList.remove('paused');
+  const tn=document.getElementById('audio-track-name');if(tn)tn.innerHTML=`<span>${track.name}</span> — WAI BGM`;
+  bgmSource=setTimeout(()=>{if(bgmPlaying)playBGM();},dur*1000);
+}
+
+function stopBGM(){
+  bgmPlaying=false;
+  if(bgmSource){clearTimeout(bgmSource);bgmSource=null;}
+  if(audioCtx) audioCtx.suspend();
+  const pb=document.getElementById('audio-play-btn');if(pb)pb.textContent='▶';
+  const aw=document.getElementById('audio-wave');if(aw)aw.classList.add('paused');
+}
+
+function toggleBGM(){if(bgmPlaying)stopBGM();else playBGM();}
+
+function nextTrack(){
+  currentTrackIdx=(currentTrackIdx+1)%TRACKS.length;
+  if(bgmPlaying){stopBGM();playBGM();}
+  else{const tn=document.getElementById('audio-track-name');if(tn)tn.innerHTML=`<span>${TRACKS[currentTrackIdx].name}</span> — WAI BGM`;}
+  playClick();
+}
+
+function setVolume(v){if(!bgmGain){initAudio();}bgmGain.gain.value=parseFloat(v);}
+
+function playClick(){
+  try{
+    if(!audioCtx)initAudio();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+    osc.connect(g);g.connect(audioCtx.destination);
+    osc.frequency.value=800;osc.type='sine';
+    g.gain.setValueAtTime(0.08,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.07);
+    osc.start(audioCtx.currentTime);osc.stop(audioCtx.currentTime+0.09);
+  }catch(e){}
+}
+
+function playSuccess(){
+  try{
+    if(!audioCtx)initAudio();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    [523,659,784].forEach((freq,i)=>{
+      const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);osc.frequency.value=freq;
+      g.gain.setValueAtTime(0.1,audioCtx.currentTime+i*0.1);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+i*0.1+0.2);
+      osc.start(audioCtx.currentTime+i*0.1);osc.stop(audioCtx.currentTime+i*0.1+0.25);
+    });
+  }catch(e){}
+}
+
+function playNotif(){
+  try{
+    if(!audioCtx)initAudio();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    [440,550].forEach((freq,i)=>{
+      const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+      osc.connect(g);g.connect(audioCtx.destination);osc.frequency.value=freq;
+      g.gain.setValueAtTime(0.12,audioCtx.currentTime+i*0.15);
+      g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+i*0.15+0.25);
+      osc.start(audioCtx.currentTime+i*0.15);osc.stop(audioCtx.currentTime+i*0.15+0.3);
+    });
+  }catch(e){}
+}
+
+// Attach sounds to UI interactions
+document.addEventListener('click',e=>{
+  if(e.target.matches('button,.nb,.sb,.tb,.ct-card')) playClick();
+  if(e.target.closest('.check-row')){
+    setTimeout(()=>{if(e.target.closest('.check-row')&&e.target.closest('.check-row').classList.contains('done'))playSuccess();},60);
+  }
+});
+
+// Override showFlash to add sound
+const _origShowFlash = showFlash;
+window.showFlash = function(msg){
+  _origShowFlash(msg);
+  playSuccess();
+};
+
+// ═══════════ GOOGLE CALENDAR LIVE SYNC ═══════════
+let notifTimersList = [];
+
+const CAL_SCHEDULE = {
+  1:[{time:'08:00',title:'ENT 3074 Workshop',desc:'Online'},{time:'16:00',title:'MGT 3054 Lecture',desc:'Online'}],
+  2:[{time:'09:00',title:'FIN 3034 Tutorial',desc:'Q-3-1'},{time:'10:00',title:'FIN3154 Tutorial',desc:'Q-6-5'},{time:'11:00',title:'FIN3154 Workshop',desc:'Online'},{time:'12:00',title:'ENT 3074 Lecture',desc:'LT1'},{time:'14:00',title:'MGT 3054 Tutorial',desc:'Q-3-10'}],
+  3:[{time:'12:00',title:'FIN3154 Lecture',desc:'JC 1'}],
+  4:[{time:'12:00',title:'FIN 3034 Lecture',desc:'Online'}],
+  5:[{time:'08:00',title:'FIN 3034 Workshop',desc:'Q-LT360'},{time:'10:00',title:'ENT 3074 Tutorial',desc:'Q-6-1'},{time:'14:30',title:'MGT 3054 Workshop',desc:'Online'}]
+};
+
+// Merge urgent events into calendar
+function fetchCalendarEvents(){
+  const list=document.getElementById('cal-events-list');
+  if(!list)return;
+  const now=new Date();
+  const day=now.getDay();
+  
+  // Get class events
+  let events=[...(CAL_SCHEDULE[day]||[])];
+  
+  // Merge urgent items
+  const urg=urgentItems||[];
+  urg.forEach(u=>{
+    if(u.time&&u.text) events.push({time:u.time,title:u.text,desc:'⚡ 紧急加入',urgent:true});
+  });
+  
+  // Sort by time
+  events.sort((a,b)=>a.time.localeCompare(b.time));
+  
+  if(!events.length){
+    list.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:10px 0;">今天没有Calendar事件 🎉</div>';
+  } else {
+    renderCalEvents(events);
+    scheduleNotifications(events);
+  }
+  
+  const sync=document.getElementById('cal-last-sync');
+  if(sync) sync.textContent='最后同步：'+now.toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderCalEvents(events){
+  const list=document.getElementById('cal-events-list');
+  if(!list)return;
+  const now=new Date();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  
+  list.innerHTML=events.map(ev=>{
+    const [h,m]=(ev.time||'00:00').split(':').map(Number);
+    const evMins=h*60+m;
+    const isPast=evMins+60<nowMins;
+    const isNow=evMins<=nowMins&&nowMins<evMins+60;
+    const isSoon=evMins>nowMins&&evMins-nowMins<=30;
+    
+    let bc=ev.urgent?'var(--r)':'var(--b)';
+    let tc=ev.urgent?'var(--r)':'var(--b)';
+    let badge='';
+    if(isNow){bc='var(--g)';tc='var(--g)';badge='<span style="font-family:var(--mono);font-size:9px;background:rgba(107,203,119,.15);color:var(--g);padding:2px 6px;border-radius:3px;margin-left:6px;">● 进行中</span>';}
+    if(isSoon){bc='var(--o)';tc='var(--o)';badge='<span style="font-family:var(--mono);font-size:9px;background:rgba(255,165,82,.15);color:var(--o);padding:2px 6px;border-radius:3px;margin-left:6px;">⚡ 30分钟内</span>';}
+    
+    return `<div class="cal-event" style="border-left-color:${bc};opacity:${isPast?'0.35':'1'};">
+      <div class="cal-time" style="color:${tc};">${ev.time}</div>
+      <div style="flex:1;"><div class="cal-title">${ev.title}${badge}</div><div class="cal-desc">${ev.desc}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function scheduleNotifications(events){
+  notifTimersList.forEach(t=>clearTimeout(t));
+  notifTimersList=[];
+  const now=new Date();
+  events.forEach(ev=>{
+    const [h,m]=(ev.time||'00:00').split(':').map(Number);
+    const evDate=new Date();evDate.setHours(h,m,0,0);
+    const alertTime=new Date(evDate.getTime()-10*60*1000);
+    const msUntil=alertTime-now;
+    if(msUntil>0&&msUntil<8*60*60*1000){
+      const t=setTimeout(()=>{
+        showNotifToast('⏰ 10分钟后：'+ev.title,ev.desc,ev.time);
+        playNotif();
+      },msUntil);
+      notifTimersList.push(t);
+    }
+  });
+}
+
+function showNotifToast(title,body,time){
+  const toast=document.getElementById('notif-toast');
+  if(!toast)return;
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  document.getElementById('notif-time').textContent=time;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),6000);
+  if('Notification'in window&&Notification.permission==='granted'){
+    try{new Notification(title,{body,icon:'icon-192.png'});}catch(e){}
+  }
+}
+
+function refreshCalendar(){
+  const list=document.getElementById('cal-events-list');
+  if(list)list.innerHTML='<div class="cal-loading">正在刷新...</div>';
+  playClick();
+  setTimeout(()=>fetchCalendarEvents(),600);
+}
+
+// Request notification permission + start calendar
+function initCalendarAndNotifs(){
+  if('Notification'in window&&Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+  fetchCalendarEvents();
+  setInterval(fetchCalendarEvents,5*60*1000); // refresh every 5 min
+}
+
+
+</script>
+<script>
+// Service Worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").then(r => console.log("SW registered")).catch(e => console.log("SW failed", e));
+  });
+}
+
+// Install prompt
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById("install-btn");
+  if (btn) btn.style.display = "flex";
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r => {
+    if (r.outcome === "accepted") {
+      const btn = document.getElementById("install-btn");
+      if (btn) btn.style.display = "none";
+    }
+    deferredPrompt = null;
+  });
+}
+
+window.addEventListener("appinstalled", () => {
+  const btn = document.getElementById("install-btn");
+  if (btn) btn.style.display = "none";
+});
+</script>
+</body>
+</html>
