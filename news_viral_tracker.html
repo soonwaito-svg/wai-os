@@ -510,29 +510,45 @@ async function fetchAccountPosts(username) {
 }
 
 function parsePostsData(data, username) {
-  const posts = data.posts || data.data || data.items || data.response?.body?.items || 
-                (Array.isArray(data) ? data : []);
+  // API returns: { posts: [{ node: { ... } }] }
+  let rawPosts = data.posts || data.data || data.items || (Array.isArray(data) ? data : []);
+  
+  // Unwrap node if present
+  const posts = rawPosts.map(p => p.node || p);
   
   return posts.map(post => {
-    // Extract share/reshare count (available in some API responses)
-    const shares = post.reshare_count || post.share_count || 
-                   post.ig_media_sharing_disabled ? 0 : 
-                   post.xdt_api__v1__media?.reshare_count || 0;
+    const caption = post.caption?.text || post.caption || '';
+    const mediaType = post.media_type;
+    const type = mediaType === 2 ? 'video' : (mediaType === 8 ? 'carousel' : 'image');
+    
+    // Get thumbnail - try multiple fields
+    const thumb = post.thumbnail_url || 
+                  post.image_versions2?.candidates?.[0]?.url ||
+                  post.carousel_media?.[0]?.image_versions2?.candidates?.[0]?.url ||
+                  post.display_url || '';
+
+    // Get stats
+    const likes = post.like_count || post.likes_count || 0;
+    const comments = post.comment_count || post.comments_count || 0;
+    const views = post.view_count || post.video_view_count || post.play_count || 0;
+    const shares = post.reshare_count || post.share_count || 0;
+    
+    const code = post.code || post.shortcode || '';
+    
+    console.log(`Post: ${code} | likes:${likes} comments:${comments} views:${views} type:${type} caption:${caption.slice(0,30)}`);
     
     return {
       id: post.id || post.pk || Math.random().toString(36),
       account: username,
-      caption: post.caption?.text || post.caption || '',
-      timestamp: post.taken_at || post.timestamp || Date.now()/1000,
-      views: post.view_count || post.video_view_count || post.play_count || 0,
-      likes: post.like_count || post.likes?.count || 0,
-      comments: post.comment_count || post.comments?.count || 0,
+      caption: caption,
+      timestamp: post.taken_at || Date.now()/1000,
+      views: views,
+      likes: likes,
+      comments: comments,
       shares: shares,
-      type: post.media_type === 2 ? 'video' : (post.media_type === 8 ? 'carousel' : 'image'),
-      thumbnail: post.thumbnail_url || post.image_versions2?.candidates?.[0]?.url || 
-                 post.display_url || post.thumbnail_src || post.cover_media?.cropped_image_version?.url || '',
-      url: `https://www.instagram.com/p/${post.code || post.shortcode || post.pk || ''}/`,
-      rawData: JSON.stringify(post).slice(0, 200) // Store for debugging
+      type: type,
+      thumbnail: thumb,
+      url: `https://www.instagram.com/p/${code}/`
     };
   });
 }
