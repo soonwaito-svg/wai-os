@@ -483,8 +483,8 @@ function renderAccounts() {
 // ── FETCH POSTS FROM RAPIDAPI ──
 async function fetchAccountPosts(username) {
   try {
-    const body = `username_or_url=https%3A%2F%2Fwww.instagram.com%2F${encodeURIComponent(username)}%2F&amount=20&pagination_token=`;
-    
+    // Step 1: Get posts list
+    const body = `username_or_url=https%3A%2F%2Fwww.instagram.com%2F${encodeURIComponent(username)}%2F&amount=12&pagination_token=`;
     const response = await fetch(
       'https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_posts.php',
       {
@@ -497,12 +497,37 @@ async function fetchAccountPosts(username) {
         body: body
       }
     );
-
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    console.log('API response:', JSON.stringify(data).slice(0, 300));
-    return parsePostsData(data, username);
-
+    
+    // Step 2: Parse basic post data
+    let posts = parsePostsData(data, username);
+    
+    // Step 3: Enrich top 6 posts with detailed stats
+    const topPosts = posts.slice(0, 6);
+    const enriched = await Promise.all(topPosts.map(async (post) => {
+      try {
+        const code = post.url.split('/p/')[1]?.replace('/','');
+        if (!code) return post;
+        const r = await fetch(
+          `https://instagram-scraper-stable-api.p.rapidapi.com/get_media_data_v2.php?media_code=${code}`,
+          { headers: { 'x-rapidapi-host': 'instagram-scraper-stable-api.p.rapidapi.com', 'x-rapidapi-key': RAPIDAPI_KEY } }
+        );
+        if (!r.ok) return post;
+        const d = await r.json();
+        const m = d.data || d.media || d;
+        return {
+          ...post,
+          likes: m.like_count || m.likes_count || post.likes,
+          comments: m.comment_count || m.comments_count || post.comments,
+          views: m.view_count || m.video_view_count || m.play_count || post.views,
+          shares: m.reshare_count || m.share_count || post.shares,
+          thumbnail: m.thumbnail_url || m.image_versions2?.candidates?.[0]?.url || post.thumbnail
+        };
+      } catch(e) { return post; }
+    }));
+    
+    return [...enriched, ...posts.slice(6)];
   } catch(err) {
     console.error(`Error fetching @${username}:`, err.message);
     return [];
