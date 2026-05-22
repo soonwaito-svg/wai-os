@@ -355,7 +355,7 @@ body::before {
 <div class="ticker">
   <div class="ticker-inner">
     <span class="ticker-text" id="ticker-text">
-      正在监控 @sinchewdaily ｜ 每4小时自动刷新 ｜ 追踪：@sinchewdaily ｜ 主要指标：Share数量 ｜ 🔴爆了 = Share 600+ ｜ 🟡起飞中 = Share 300+ ｜ 🔵值得关注 = Share 100+ ｜ 每4小时自动刷新
+      正在监控 @sinchewdaily @coinsauce ｜ 数据来源：GitHub ig_data.json ｜ 主要指标：Likes ｜ 🔴爆了 = Likes 2000+ ｜ 🟡起飞中 = Likes 800+ ｜ 🔵值得关注 = Likes 200+ ｜ 刷新页面即更新
     </span>
   </div>
 </div>
@@ -367,17 +367,17 @@ body::before {
     <div class="stat-card red">
       <div class="stat-label">🔴 爆了</div>
       <div class="stat-value" id="stat-hot">0</div>
-      <div class="stat-sub">Share ≥ 600</div>
+      <div class="stat-sub">Likes ≥ 2000</div>
     </div>
     <div class="stat-card yellow">
       <div class="stat-label">🟡 起飞中</div>
       <div class="stat-value" id="stat-rising">0</div>
-      <div class="stat-sub">Share ≥ 300</div>
+      <div class="stat-sub">Likes ≥ 800</div>
     </div>
     <div class="stat-card blue">
       <div class="stat-label">🔵 值得关注</div>
       <div class="stat-value" id="stat-watch">0</div>
-      <div class="stat-sub">Share ≥ 100</div>
+      <div class="stat-sub">Likes ≥ 200</div>
     </div>
     <div class="stat-card green">
       <div class="stat-label">📊 已扫描帖子</div>
@@ -413,9 +413,9 @@ body::before {
     <div class="threshold-selector">
       <span>Share门槛：</span>
       <select id="threshold-select" onchange="updateShareThreshold()">
-        <option value="strict">严格（600/300/100）</option>
-        <option value="standard" selected>标准（400/200/80）</option>
-        <option value="loose">宽松（200/100/50）</option>
+        <option value="strict">严格（3000/1000/300）</option>
+        <option value="standard" selected>标准（2000/800/200）</option>
+        <option value="loose">宽松（1000/400/100）</option>
       </select>
     </div>
   </div>
@@ -448,11 +448,10 @@ body::before {
 
 <script>
 // ── CONFIG ──
-const RAPIDAPI_KEY = '6cbf68190dmshdf6b87b5a082f4dp15f481jsn07255531eb33';
-const RAPIDAPI_HOST = 'instagram-scraper-stable-api.p.rapidapi.com';
+const GITHUB_DATA_URL = 'https://raw.githubusercontent.com/soonwaito-svg/wai-os/main/ig_data.json';
 
 // ── STATE ──
-let accounts = JSON.parse(localStorage.getItem('news_accounts') || '["sinchewdaily"]');
+let accounts = ['sinchewdaily', 'coinsauce'];
 let allPosts = [];
 let currentFilter = 'all';
 let refreshInterval = null;
@@ -480,100 +479,45 @@ function renderAccounts() {
   document.getElementById('stat-accounts').textContent = accounts.length + ' 个账号';
 }
 
-// ── FETCH POSTS FROM RAPIDAPI ──
-async function fetchAccountPosts(username) {
-  try {
-    // Single call only - extract all data from User Posts endpoint
-    const body = `username_or_url=https%3A%2F%2Fwww.instagram.com%2F${encodeURIComponent(username)}%2F&amount=20&pagination_token=`;
-    const response = await fetch(
-      'https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_posts.php',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-rapidapi-host': 'instagram-scraper-stable-api.p.rapidapi.com',
-          'x-rapidapi-key': RAPIDAPI_KEY
-        },
-        body: body
-      }
-    );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    return parsePostsData(data, username);
-  } catch(err) {
-    console.error(`Error fetching @${username}:`, err.message);
-    return [];
+// ── FETCH FROM GITHUB ig_data.json ──
+async function loadFromGitHub() {
+  // cache buster 避免 CDN 缓存
+  const resp = await fetch(GITHUB_DATA_URL + '?t=' + Date.now());
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json();
+  return data; // { last_updated, accounts: { username: [...] } }
+}
+
+function parseGitHubPosts(igData) {
+  const result = [];
+  for (const [username, posts] of Object.entries(igData.accounts || {})) {
+    for (const p of posts) {
+      result.push({
+        id: p.url,
+        account: username,
+        caption: p.caption || '',
+        timestamp: new Date(p.timestamp).getTime() / 1000,
+        likes: p.likes || 0,
+        comments: p.comments || 0,
+        views: 0,   // 无登录无法取得
+        shares: 0,  // 无登录无法取得
+        type: p.type || 'image',
+        thumbnail: '',
+        url: p.url
+      });
+    }
   }
+  return result;
 }
 
-function parsePostsData(data, username) {
-  // API returns: { posts: [{ node: { ... } }] }
-  let rawPosts = data.posts || data.data || data.items || (Array.isArray(data) ? data : []);
-  
-  // Unwrap node if present
-  const posts = rawPosts.map(p => p.node || p);
-  
-  return posts.map(post => {
-    const caption = post.caption?.text || post.caption || '';
-    const mediaType = post.media_type;
-    const type = mediaType === 2 ? 'video' : (mediaType === 8 ? 'carousel' : 'image');
-    
-    // Get thumbnail - try multiple fields
-    const thumb = post.thumbnail_url || 
-                  post.image_versions2?.candidates?.[0]?.url ||
-                  post.carousel_media?.[0]?.image_versions2?.candidates?.[0]?.url ||
-                  post.display_url || '';
-
-    // Get stats
-    const likes = post.like_count || post.likes_count || 0;
-    const comments = post.comment_count || post.comments_count || 0;
-    const views = post.view_count || post.video_view_count || post.play_count || 0;
-    const shares = post.reshare_count || post.share_count || 0;
-    
-    const code = post.code || post.shortcode || '';
-    
-    console.log(`Post: ${code} | likes:${likes} comments:${comments} views:${views} type:${type} caption:${caption.slice(0,30)}`);
-    
-    return {
-      id: post.id || post.pk || Math.random().toString(36),
-      account: username,
-      caption: caption,
-      timestamp: post.taken_at || Date.now()/1000,
-      views: views,
-      likes: likes,
-      comments: comments,
-      shares: shares,
-      type: type,
-      thumbnail: thumb,
-      url: `https://www.instagram.com/p/${code}/`
-    };
-  });
-}
-
-// ── CLASSIFY VIRAL STATUS (Share-first logic) ──
-// Primary signal: Shares (most reliable viral indicator)
-// Fallback: Views (video), then Likes+Comments combo (carousel)
+// ── CLASSIFY VIRAL STATUS (Likes-based，无登录无 shares/views) ──
 function classifyPost(post) {
-  const shares = post.shares || 0;
   const likes = post.likes || 0;
   const comments = post.comments || 0;
-  const views = post.views || 0;
 
-  // Primary: Share count (uses selected threshold)
-  if (shares >= currentThreshold.hot) return 'hot';
-  if (shares >= currentThreshold.rising) return 'rising';
-  if (shares >= currentThreshold.watch) return 'watch';
-
-  // Fallback: Views (video content)
-  if (views >= 50000) return 'hot';
-  if (views >= 20000) return 'rising';
-  if (views >= 5000) return 'watch';
-
-  // Fallback: Likes + Comments (carousel/image)
-  if (likes >= 2000 && comments >= 80) return 'hot';
-  if (likes >= 800 || comments >= 40) return 'rising';
-  if (likes >= 300 || comments >= 15) return 'watch';
-
+  if (likes >= currentThreshold.hot   || comments >= currentThreshold.hot   * 0.03) return 'hot';
+  if (likes >= currentThreshold.rising || comments >= currentThreshold.rising * 0.04) return 'rising';
+  if (likes >= currentThreshold.watch  || comments >= currentThreshold.watch  * 0.05) return 'watch';
   return 'normal';
 }
 
@@ -709,41 +653,52 @@ function applyFilter() {
 async function refreshAll() {
   const btn = document.getElementById('refresh-btn');
   btn.classList.add('loading');
-  btn.querySelector('span:last-child').textContent = '抓取中...';
-  
+  btn.querySelector('span:last-child').textContent = '读取中...';
+
   document.getElementById('posts-container').innerHTML = `
     <div class="loading-state">
       <div class="loading-spinner"></div>
-      <div class="loading-text">正在抓取 ${accounts.map(a=>'@'+a).join('、')} 的最新帖子...</div>
+      <div class="loading-text">正在从 GitHub 读取最新数据...</div>
     </div>`;
 
-  allPosts = [];
-  
-  for (const acc of accounts) {
-    const posts = await fetchAccountPosts(acc);
-    allPosts = [...allPosts, ...posts];
+  try {
+    const igData = await loadFromGitHub();
+    allPosts = parseGitHubPosts(igData);
+
+    // 同步账号列表
+    accounts = Object.keys(igData.accounts || {});
+    renderAccounts();
+
+    updateStats(allPosts);
+    applyFilter();
+
+    const dataTime = igData.last_updated
+      ? new Date(igData.last_updated).toLocaleString('zh', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '未知';
+    document.getElementById('last-update').textContent =
+      `数据时间：${dataTime} ｜ 共 ${allPosts.length} 条帖子`;
+
+    // Update ticker
+    const topPost = [...allPosts].sort((a,b) => (b.likes||0)-(a.likes||0))[0];
+    if (topPost) {
+      document.getElementById('ticker-text').textContent =
+        `🔴 最热帖子：@${topPost.account} — ${fmt(topPost.likes)} Likes ｜ ${fmt(topPost.comments)} Comments ｜ ${topPost.caption?.slice(0,50)||''}...`;
+    }
+  } catch(err) {
+    document.getElementById('posts-container').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">读取失败：${err.message}<br>请确认 ig_data.json 已推送到 GitHub</div>
+      </div>`;
+    console.error('refreshAll error:', err);
   }
 
-  updateStats(allPosts);
-  applyFilter();
-  
-  const now = new Date();
-  document.getElementById('last-update').textContent = 
-    `最后更新：${now.toLocaleTimeString('zh', {hour:'2-digit', minute:'2-digit'})} ｜ 共 ${allPosts.length} 条帖子`;
-  
   // Schedule next refresh in 4 hours
-  nextRefreshTime = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+  nextRefreshTime = new Date(Date.now() + 4 * 60 * 60 * 1000);
   startCountdown();
-  
+
   btn.classList.remove('loading');
   btn.querySelector('span:last-child').textContent = '刷新';
-  
-  // Update ticker
-  const topPost = allPosts.sort((a,b) => (b.views||0)-(a.views||0))[0];
-  if (topPost) {
-    document.getElementById('ticker-text').textContent = 
-      `🔴 最热帖子：@${topPost.account} — ${fmt(topPost.views)} Views ｜ ${fmt(topPost.likes)} Likes ｜ ${topPost.caption?.slice(0,50)||''}... ｜ 下次自动刷新：4小时后`;
-  }
 }
 
 // ── COUNTDOWN ──
@@ -769,40 +724,33 @@ function openModal() { document.getElementById('modal').classList.add('open'); d
 function closeModal() { document.getElementById('modal').classList.remove('open'); document.getElementById('new-account-input').value = ''; }
 
 function addAccount() {
-  let val = document.getElementById('new-account-input').value.trim().replace('@','');
-  if (!val) return;
-  if (!accounts.includes(val)) {
-    accounts.push(val);
-    localStorage.setItem('news_accounts', JSON.stringify(accounts));
-    renderAccounts();
-  }
+  // 账号由 ig_data.json 控制，modal 仅提示
+  alert('账号列表由 ig_data.json 控制，请更新 scraper.js 里的 ACCOUNTS 并重新运行。');
   closeModal();
 }
 
-function toggleAccount(i) {
-  // For now just highlight — future: toggle on/off
-}
+function toggleAccount(i) {}
 
-// ── SHARE THRESHOLD CONFIG ──
+// ── LIKES THRESHOLD CONFIG ──
 const THRESHOLDS = {
-  strict:   { hot: 600, rising: 300, watch: 100 },
-  standard: { hot: 400, rising: 200, watch: 80  },
-  loose:    { hot: 200, rising: 100, watch: 50  }
+  strict:   { hot: 3000, rising: 1000, watch: 300 },
+  standard: { hot: 2000, rising: 800,  watch: 200 },
+  loose:    { hot: 1000, rising: 400,  watch: 100 }
 };
 let currentThreshold = THRESHOLDS.standard;
 
 function updateShareThreshold() {
   const val = document.getElementById('threshold-select').value;
   currentThreshold = THRESHOLDS[val];
-  // Update stats bar labels
-  document.querySelectorAll('.stat-sub')[0].textContent = 'Share ≥ ' + currentThreshold.hot;
-  document.querySelectorAll('.stat-sub')[1].textContent = 'Share ≥ ' + currentThreshold.rising;
-  document.querySelectorAll('.stat-sub')[2].textContent = 'Share ≥ ' + currentThreshold.watch;
+  document.querySelectorAll('.stat-sub')[0].textContent = 'Likes ≥ ' + currentThreshold.hot;
+  document.querySelectorAll('.stat-sub')[1].textContent = 'Likes ≥ ' + currentThreshold.rising;
+  document.querySelectorAll('.stat-sub')[2].textContent = 'Likes ≥ ' + currentThreshold.watch;
   applyFilter();
 }
 
 // ── INIT ──
 renderAccounts();
+refreshAll(); // 页面加载自动拉数据
 </script>
 </body>
 </html>
