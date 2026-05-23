@@ -7,7 +7,7 @@
 const { chromium } = require("playwright");
 const fs = require("fs");
 
-const ACCOUNTS = ["sinchewdaily", "coinsauce"];
+const ACCOUNTS = ["sinchewdaily", "coinsauce", "jonathanquek360", "weishengofficial", "txedugroup", "davidyet", "ask_davidjustin"];
 const POSTS_TARGET = 20;
 const OUTPUT_FILE = "ig_data.json";
 
