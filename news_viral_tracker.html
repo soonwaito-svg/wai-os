@@ -448,7 +448,7 @@ body::before {
 
 <script>
 // ── CONFIG ──
-const GITHUB_DATA_URL = 'https://raw.githubusercontent.com/soonwaito-svg/wai-os/main/ig_data.json';
+const GITHUB_DATA_URL = 'https://api.github.com/repos/soonwaito-svg/wai-os/contents/ig_data.json';
 
 // ── STATE ──
 let accounts = ['sinchewdaily', 'coinsauce'];
@@ -481,8 +481,11 @@ function renderAccounts() {
 
 // ── FETCH FROM GITHUB ig_data.json ──
 async function loadFromGitHub() {
-  // cache buster 避免 CDN 缓存
-  const resp = await fetch(GITHUB_DATA_URL + '?t=' + Date.now());
+  // 用 GitHub Contents API，绕过 CDN 缓存，拿最新数据
+  const resp = await fetch(GITHUB_DATA_URL, {
+    headers: { 'Accept': 'application/vnd.github.raw+json' },
+    cache: 'no-store'
+  });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   const data = await resp.json();
   return data; // { last_updated, accounts: { username: [...] } }
